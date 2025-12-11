@@ -1,0 +1,15 @@
+{
+  "name": "aave-ink-withdraw-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot to notify on Aave Ink withdrawals",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0",
+    "node-telegram-bot-api": "^0.64.0",
+    "puppeteer": "^24.32.1"
+  }
+}
