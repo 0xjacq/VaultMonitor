@@ -169,13 +169,14 @@ class WebServer {
     }
 
     start(port = 3000) {
-        // Enforce binding to localhost only
-        this.app.listen(port, '127.0.0.1', () => {
-            console.log(`[Web] Dashboard running at http://127.0.0.1:${port}`);
+        // Use HOST env var if set (e.g. 127.0.0.1), otherwise 0.0.0.0 for Docker
+        const host = process.env.HOST || '0.0.0.0';
+        this.app.listen(port, host, () => {
+            console.log(`[Web] Dashboard running at http://${host}:${port}`);
         });
     }
 }
 
-
 module.exports = WebServer;
+
 
