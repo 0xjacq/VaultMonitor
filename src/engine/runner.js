@@ -29,33 +29,62 @@ class ProbeRunner {
     }
 
     enableProbe(id) {
-        const probeConfig = this.config.probes.find(p => p.id === id);
-        if (probeConfig) {
-            probeConfig.enabled = true;
-            this.scheduleProbe(probeConfig); // Re-schedule
-            console.log(`[Runner] Probe ${id} enabled.`);
+        console.log(`[Runner] Enabling probe ${id}...`);
+        try {
+            if (!this.config) {
+                console.error('[Runner] Error: Config is undefined!');
+                throw new Error('Config is undefined');
+            }
+            const probeConfig = this.config.probes.find(p => p.id === id);
+            if (probeConfig) {
+                probeConfig.enabled = true;
+                this.scheduleProbe(probeConfig);
+                console.log(`[Runner] Probe ${id} enabled.`);
+            } else {
+                console.warn(`[Runner] Probe ${id} not found in config.`);
+            }
+        } catch (e) {
+            console.error('[Runner] enableProbe failed:', e);
+            throw e;
         }
     }
 
     disableProbe(id) {
-        const probeConfig = this.config.probes.find(p => p.id === id);
-        if (probeConfig) {
-            probeConfig.enabled = false;
-            // Clear interval
-            const handle = this.runningProbes.get(id);
-            if (handle) clearInterval(handle);
-            this.runningProbes.delete(id);
-            console.log(`[Runner] Probe ${id} disabled.`);
+        console.log(`[Runner] Disabling probe ${id}...`);
+        try {
+            if (!this.config) {
+                console.error('[Runner] Error: Config is undefined!');
+                throw new Error('Config is undefined');
+            }
+            const probeConfig = this.config.probes.find(p => p.id === id);
+            if (probeConfig) {
+                probeConfig.enabled = false;
+                const handle = this.runningProbes.get(id);
+                if (handle) clearInterval(handle);
+                this.runningProbes.delete(id);
+                console.log(`[Runner] Probe ${id} disabled.`);
+            } else {
+                console.warn(`[Runner] Probe ${id} not found in config.`);
+            }
+        } catch (e) {
+            console.error('[Runner] disableProbe failed:', e);
+            throw e;
         }
     }
 
     async muteProbe(id, durationMinutes) {
-        const state = StateManager.getProbeState(id) || {};
-        const muteUntil = Date.now() + (durationMinutes * 60 * 1000);
-        state.data = state.data || {};
-        state.data.muted_until = muteUntil;
-        StateManager.saveProbeState(id, state);
-        console.log(`[Runner] Probe ${id} muted for ${durationMinutes}m`);
+        console.log(`[Runner] Muting probe ${id}...`);
+        try {
+            const state = StateManager.getProbeState(id) || {};
+            const muteUntil = Date.now() + (durationMinutes * 60 * 1000);
+            state.data = state.data || {};
+            state.data.muted_until = muteUntil;
+            StateManager.saveProbeState(id, state);
+            console.log(`[Runner] Probe ${id} muted for ${durationMinutes}m`);
+        } catch (e) {
+            console.error('[Runner] muteProbe failed:', e);
+            throw e;
+        }
     }
 
     async scheduleProbe(config) {

@@ -161,9 +161,10 @@ class WebServer {
                     await this.runner.muteProbe(id, muteDuration);
                     res.json({ success: true, message: `Probe ${id} muted for ${muteDuration}m` });
                 } else {
-                    res.status(400).json({ error: 'Invalid action' });
+                    res.status(400).json({ error: `Invalid action: ${action}` });
                 }
             } catch (e) {
+                console.error('[API] Control Error:', e);
                 res.status(500).json({ error: e.message });
             }
         });
@@ -180,6 +181,54 @@ class WebServer {
             const limit = req.query.limit || 50;
             const rows = db.prepare('SELECT * FROM run_history ORDER BY created_at DESC LIMIT ?').all(limit);
             res.json(rows);
+        });
+
+        // Config Editor
+        const fs = require('fs');
+        const ConfigLoader = require('../utils/config_loader');
+        const configPath = path.join(__dirname, '../../config/config.yaml');
+
+        this.app.get('/api/config', (req, res) => {
+            try {
+                const content = fs.readFileSync(configPath, 'utf8');
+                res.json({ content });
+            } catch (e) {
+                res.status(500).json({ error: e.message });
+            }
+        });
+
+        this.app.post('/api/config', (req, res) => {
+            const { content } = req.body;
+            try {
+                // Validate YAML by parsing
+                require('yaml').parse(content);
+
+                // Write to file
+                fs.writeFileSync(configPath, content, 'utf8');
+                res.json({ success: true });
+            } catch (e) {
+                res.status(400).json({ error: 'Invalid YAML: ' + e.message });
+            }
+        });
+
+        this.app.post('/api/config/reload', async (req, res) => {
+            try {
+                console.log('[Web] Reloading configuration...');
+                // 1. Stop engine
+                this.runner.stop();
+
+                // 2. Load new config
+                const newConfig = ConfigLoader.load(configPath);
+
+                // 3. Start engine
+                await this.runner.start(newConfig);
+
+                console.log('[Web] Configuration reloaded successfully.');
+                res.json({ success: true, message: 'Configuration reloaded and engine restarted.' });
+            } catch (e) {
+                console.error('[Web] Failed to reload config:', e);
+                res.status(500).json({ error: e.message });
+            }
         });
     }
 
