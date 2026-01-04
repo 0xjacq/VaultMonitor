@@ -3,6 +3,8 @@ const ThresholdRule = require('../rules/threshold');
 const ChangeRule = require('../rules/change');
 const { ProbeType } = require('../core/types');
 
+const HttpProbe = require('../probes/http');
+
 class ProbeFactory {
     create(config) {
         let probe;
@@ -10,6 +12,10 @@ class ProbeFactory {
             case 'evm_call':
             case ProbeType.EVM_CALL:
                 probe = new EvmCallProbe(config.id, config);
+                break;
+            case 'http':
+            case ProbeType.HTTP:
+                probe = new HttpProbe(config.id, config);
                 break;
             default:
                 throw new Error(`Unknown probe type: ${config.type}`);

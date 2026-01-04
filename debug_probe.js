@@ -57,6 +57,29 @@ async function debugProbe(probeId) {
                 console.log(`❌ FAILED: ${err.message}`);
             }
         }
+    } else if (probeConfig.type === 'http') {
+        const axios = require('axios');
+        console.log(`[Debug] Fetching URL: ${probeConfig.url}`);
+        try {
+            const res = await axios.get(probeConfig.url);
+            console.log('✅ Response Status:', res.status);
+            console.log('✅ Data:', res.data);
+
+            // Test Extraction
+            if (probeConfig.extract) {
+                console.log('--- Extraction Check ---');
+                // Simple helper from http.js (duplicated here for test)
+                const getValue = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
+
+                for (const [key, path] of Object.entries(probeConfig.extract)) {
+                    const val = getValue(res.data, path);
+                    console.log(`Key [${key}] -> Path [${path}] -> Value: ${val}`);
+                }
+            }
+
+        } catch (err) {
+            console.log(`❌ HTTP Request Failed: ${err.message}`);
+        }
     } else {
         console.log("Debug not implemented for this probe type yet.");
     }

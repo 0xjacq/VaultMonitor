@@ -41,3 +41,20 @@ probes:
         fact: supplyCap_formatted
         severity: info
         title: "USD3 Supply Cap Changed"
+
+  - id: pendle_monitor
+    type: http
+    enabled: true
+    interval: 60000
+    url: "https://api-v2.pendle.finance/core/v1/sdk/1/markets/0xeaac9b0b4f25cc63255198a3920fcf7752509586/swapping-prices"
+    extract:
+      impliedApy: impliedApy
+    rules:
+      - id: pendle_apy_check
+        type: threshold
+        fact: impliedApy
+        operator: ">"
+        threshold: 0.14
+        severity: warning
+        title: "Pendle APY Alert"
+        messageTemplate: "Implied APY is ${value} (Threshold: ${threshold})"
