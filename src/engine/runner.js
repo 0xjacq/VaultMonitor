@@ -14,10 +14,18 @@ class ProbeRunner {
 
     async start(config) {
         console.log('[Runner] Starting engine...');
+        this.config = config;
 
         for (const probeConfig of config.probes) {
             await this.scheduleProbe(probeConfig);
         }
+    }
+
+    async runProbeById(id) {
+        const probeConfig = this.config.probes.find(p => p.id === id);
+        if (!probeConfig) throw new Error(`Probe ${id} not found`);
+        const probe = this.factory.create(probeConfig);
+        await this.runProbe(probe);
     }
 
     async scheduleProbe(config) {

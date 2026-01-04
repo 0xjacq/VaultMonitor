@@ -108,6 +108,11 @@ class WebServer {
 
             // Since we don't have that yet, let's implement a dummy response 
             // and then go fix Runner to support this.
+            // Debugging
+            console.log('[API] /api/probes called');
+            console.log('[API] runner exists?', !!this.runner);
+            console.log('[API] runner.config exists?', !!(this.runner && this.runner.config));
+
             if (this.runner && this.runner.config) {
                 const probes = this.runner.config.probes.map(p => {
                     const state = StateManager.getProbeState(p.id);
