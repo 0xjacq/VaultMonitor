@@ -31,7 +31,7 @@ if (fs.existsSync(persistenceFile)) {
 
 async function monitorAaveInk() {
     try {
-        // console.log(`[${new Date().toISOString()}] Polling Aave Ink...`); // Reduced log spam
+        console.log(`[${new Date().toISOString()}] Polling Aave Ink...`);
         const response = await axios.get(apiUrl, {
             headers: { 'accept': 'application/json' }
         });
