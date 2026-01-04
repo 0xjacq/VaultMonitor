@@ -144,7 +144,7 @@ class WebServer {
         // Control: Enable/Disable/Run/Mute
         this.app.post('/api/probes/:id/:action', async (req, res) => {
             const { id, action } = req.params;
-            const { duration } = req.body; // for mute
+            const { duration } = req.body || {}; // for mute, safe check
 
             try {
                 if (action === 'run') {
