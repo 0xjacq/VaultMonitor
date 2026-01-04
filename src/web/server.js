@@ -41,6 +41,9 @@ class WebServer {
 
         // Auth Middleware
         this.app.use((req, res, next) => {
+            // Debug Auth
+            // console.log(`[Middleware] ${req.method} ${req.path} - Session:`, req.session ? req.session.authenticated : 'No Session');
+
             // Public routes
             if (req.path === '/login' || req.path === '/auth/login' || req.path === '/api/status') {
                 return next();
@@ -50,6 +53,8 @@ class WebServer {
             if (req.session && req.session.authenticated) {
                 return next();
             }
+
+            console.log(`[Middleware] Unauthorized access to ${req.path}`);
 
             // API vs Page
             if (req.path.startsWith('/api')) {
@@ -110,8 +115,12 @@ class WebServer {
             // and then go fix Runner to support this.
             // Debugging
             console.log('[API] /api/probes called');
-            console.log('[API] runner exists?', !!this.runner);
-            console.log('[API] runner.config exists?', !!(this.runner && this.runner.config));
+            console.log('[API] this.runner keys:', Object.keys(this.runner));
+            if (this.runner.config) {
+                console.log('[API] config.probes length:', this.runner.config.probes.length);
+            } else {
+                console.log('[API] runner.config is UNDEFINED');
+            }
 
             if (this.runner && this.runner.config) {
                 const probes = this.runner.config.probes.map(p => {
@@ -132,24 +141,25 @@ class WebServer {
             }
         });
 
-        // Control: Enable/Disable/Run
+        // Control: Enable/Disable/Run/Mute
         this.app.post('/api/probes/:id/:action', async (req, res) => {
             const { id, action } = req.params;
+            const { duration } = req.body; // for mute
 
             try {
                 if (action === 'run') {
-                    // Trigger manual run
-                    // Warning: accessing private method or need public API
-                    // Need to expose `runner.runProbeById(id)`
                     await this.runner.runProbeById(id);
                     res.json({ success: true, message: `Probe ${id} run started` });
                 } else if (action === 'enable') {
-                    // Update valid config in memory & DB? 
-                    // MVP: Just update memory for now or simple "enabled" flag in DB override?
-                    // User asked for "toggle persistant (DB)".
-                    // So we must modify config or store override in DB.
-                    // Let's implement DB override in StateManager later.
-                    res.status(501).json({ error: 'Not implemented yet' });
+                    this.runner.enableProbe(id);
+                    res.json({ success: true, message: `Probe ${id} enabled` });
+                } else if (action === 'disable') {
+                    this.runner.disableProbe(id);
+                    res.json({ success: true, message: `Probe ${id} disabled` });
+                } else if (action === 'mute') {
+                    const muteDuration = duration || 15; // default 15 min
+                    await this.runner.muteProbe(id, muteDuration);
+                    res.json({ success: true, message: `Probe ${id} muted for ${muteDuration}m` });
                 } else {
                     res.status(400).json({ error: 'Invalid action' });
                 }

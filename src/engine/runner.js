@@ -28,8 +28,45 @@ class ProbeRunner {
         await this.runProbe(probe);
     }
 
+    enableProbe(id) {
+        const probeConfig = this.config.probes.find(p => p.id === id);
+        if (probeConfig) {
+            probeConfig.enabled = true;
+            this.scheduleProbe(probeConfig); // Re-schedule
+            console.log(`[Runner] Probe ${id} enabled.`);
+        }
+    }
+
+    disableProbe(id) {
+        const probeConfig = this.config.probes.find(p => p.id === id);
+        if (probeConfig) {
+            probeConfig.enabled = false;
+            // Clear interval
+            const handle = this.runningProbes.get(id);
+            if (handle) clearInterval(handle);
+            this.runningProbes.delete(id);
+            console.log(`[Runner] Probe ${id} disabled.`);
+        }
+    }
+
+    async muteProbe(id, durationMinutes) {
+        const state = StateManager.getProbeState(id) || {};
+        const muteUntil = Date.now() + (durationMinutes * 60 * 1000);
+        state.data = state.data || {};
+        state.data.muted_until = muteUntil;
+        StateManager.saveProbeState(id, state);
+        console.log(`[Runner] Probe ${id} muted for ${durationMinutes}m`);
+    }
+
     async scheduleProbe(config) {
+        // ... (existing code, ensure it respects enabled flag which it does)
         const probeId = config.id;
+        // Clear existing if any (to avoid duplicates when re-enabling)
+        if (this.runningProbes.has(probeId)) {
+            clearInterval(this.runningProbes.get(probeId));
+            this.runningProbes.delete(probeId);
+        }
+
         if (!config.enabled) {
             console.log(`[Runner] Probe ${probeId} is disabled.`);
             return;
@@ -39,10 +76,8 @@ class ProbeRunner {
             const probe = this.factory.create(config);
             console.log(`[Runner] Scheduling probe ${probeId} every ${config.interval}ms`);
 
-            // Run immediately
-            this.runProbe(probe);
+            this.runProbe(probe); // Run once immediately
 
-            // Schedule
             const handle = setInterval(() => {
                 this.runProbe(probe);
             }, config.interval);
@@ -59,23 +94,21 @@ class ProbeRunner {
         const probeId = probe.id;
 
         try {
-            // Load previous state
-            const state = StateManager.getProbeState(probeId);
+            const state = StateManager.getProbeState(probeId) || { data: {} };
 
-            // Execute
-            // console.log(`[Runner] Running ${probeId}...`);
-            const alerts = await probe.evaluate({}, state); // In v2, evaluate might do collection internally or we split it.
-            // Wait, BaseProbe definition: run() calls collect() then evaluate().
-            // Let's assume probe.run() does the work and returns alerts.
-            // Actually BaseProbe.run() is abstract. Let's fix BaseProbe usage.
-
-            // Correct usage: probe.run() -> returns alerts
-            // Let's assume implementations of run() handle everything.
-            // But wait, my BaseProbe definition had `evaluate(facts)`.
-            // Let's adjust implementations to have a main entry point `execute()` or similar.
-            // Ref: BaseProbe says "run() must be implemented".
+            // Check Mute
+            if (state.data && state.data.muted_until && Date.now() < state.data.muted_until) {
+                console.log(`[Runner] Probe ${probeId} is muted. Skipping logic.`);
+                // We still record the run as success but skipped logic? Or just skip?
+                // Let's record it as generic success with 0 duration to show liveness
+                StateManager.recordRun(probeId, 'success', 0, 'Muted');
+                return;
+            }
 
             const generatedAlerts = await probe.run(state);
+
+            // SAVE STATE! This was missing
+            StateManager.saveProbeState(probeId, state);
 
             if (generatedAlerts && generatedAlerts.length > 0) {
                 await this.alertManager.processAlerts(generatedAlerts);

@@ -11,9 +11,7 @@
     <style>
         :root {
             --bg-color: #0f172a;
-            /* Slate 900 */
             --card-bg: #1e293b;
-            /* Slate 800 */
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --accent-green: #10b981;
@@ -24,7 +22,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-primary);
             margin: 0;
             padding: 20px;
@@ -35,13 +33,11 @@
             margin: 0 auto;
         }
 
-        /* Header */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            padding: 10px 0;
         }
 
         .brand {
@@ -59,7 +55,6 @@
             padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -70,27 +65,13 @@
             color: white;
         }
 
-        /* Grid Layout */
-        .top-stats {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        @media (max-width: 768px) {
-            .top-stats {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Cards */
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 30px;
         }
 
         .card-header {
@@ -106,73 +87,15 @@
             font-weight: 600;
         }
 
-        /* Status Widget */
-        .status-widget {
-            display: flex;
-            align-items: flex-start;
-            gap: 15px;
-        }
-
-        .status-icon-box {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--accent-green);
-            padding: 12px;
-            border-radius: 12px;
-        }
-
-        .status-details .label {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            margin-bottom: 4px;
-        }
-
-        .status-details .value {
-            font-weight: 500;
-            font-size: 1.1em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            background: var(--accent-green);
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        /* Mini Stats */
-        .mini-stats {
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
-
-        .stat-item .val {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .stat-item .lbl {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        /* Tables */
         table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            margin-top: 10px;
         }
 
         th {
             text-align: left;
             color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 0.85rem;
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
         }
@@ -180,18 +103,12 @@
         td {
             padding: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-size: 0.95rem;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
         }
 
         tr:hover td {
             background: rgba(255, 255, 255, 0.01);
         }
 
-        /* Badges & Buttons */
         .badge {
             padding: 4px 10px;
             border-radius: 20px;
@@ -208,180 +125,173 @@
             border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
-        .badge-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: #f59e0b;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-        }
-
         .badge-error {
             background: rgba(239, 68, 68, 0.1);
             color: var(--accent-red);
             border: 1px solid rgba(239, 68, 68, 0.2);
         }
 
-        .action-btn {
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-gray {
+            background: rgba(148, 163, 184, 0.1);
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
             background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
-            padding: 6px 12px;
+            padding: 6px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
         }
 
-        .action-btn:hover {
+        .btn-icon:hover {
             background: var(--hover-color);
             color: white;
         }
 
+        .btn-run:hover {
+            background: rgba(37, 99, 235, 0.2);
+            color: #60a5fa;
+            border-color: #2563eb;
+        }
+
+        .btn-stop:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border-color: #ef4444;
+        }
+
+        .btn-mute:hover {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border-color: #f59e0b;
+        }
+
         .refresh-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
             background: #2563eb;
             color: white;
             border: none;
             padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .refresh-btn:hover {
             background: #1d4ed8;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-            font-style: italic;
         }
     </style>
 </head>
 
 <body>
     <div id="app" class="container">
-        <!-- Header -->
         <header>
-            <div class="brand">
-                <i data-lucide="shield-alert" style="color: #ef4444"></i>
-                VaultMonitor
-            </div>
-            <button @click="logout" class="logout-btn">
-                <i data-lucide="log-out" width="16"></i> Logout
-            </button>
+            <div class="brand"><i data-lucide="shield-alert" style="color: #ef4444"></i> VaultMonitor</div>
+            <button @click="logout" class="logout-btn"><i data-lucide="log-out" width="16"></i> Logout</button>
         </header>
 
-        <!-- Top Overview -->
-        <div class="top-stats">
-            <!-- System Status -->
-            <div class="card status-widget">
-                <div class="status-icon-box">
-                    <i data-lucide="activity" width="32" height="32"></i>
-                </div>
-                <div class="status-details" v-if="status">
-                    <div class="label">System Status</div>
-                    <div class="value" style="color: var(--accent-green)">
-                        <span class="dot"></span> Online
-                    </div>
-                    <div class="label" style="margin-top: 5px">
-                        Uptime: {{ (status.uptime / 60).toFixed(0) }} min
-                    </div>
-                </div>
-                <div v-else class="status-details">Loading...</div>
-            </div>
-
-            <!-- Mini Summary -->
-            <div class="card mini-stats">
-                <div class="stat-item">
-                    <div class="val">{{ probes.length }}</div>
-                    <div class="lbl">Probes</div>
-                </div>
-                <div class="stat-item">
-                    <div class="val">{{ alerts.length }}</div>
-                    <div class="lbl">Alerts</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Probes List -->
-        <div class="card" style="margin-bottom: 30px;">
+        <div class="card">
             <div class="card-header">
                 <h2>Active Probes</h2>
-                <button @click="reloadData" class="refresh-btn">
-                    <i data-lucide="refresh-cw" width="16"></i> Refresh
-                </button>
+                <button @click="reloadData" class="refresh-btn"><i data-lucide="refresh-cw" width="16"></i>
+                    Refresh</button>
             </div>
             <table>
                 <thead>
                     <tr>
+                        <th>Status</th>
                         <th>ID</th>
                         <th>Type</th>
-                        <th>Interval</th>
                         <th>Last Block</th>
-                        <th>Last Update</th>
-                        <th>Action</th>
+                        <th>Last Activity</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="probe in probes" :key="probe.id">
                         <td>
-                            <span class="badge badge-success">
-                                <i data-lucide="check-circle" width="12"></i> {{ probe.id }}
-                            </span>
+                            <span v-if="probe.enabled" class="badge badge-success">Running</span>
+                            <span v-else class="badge badge-gray">Stopped</span>
                         </td>
+                        <td style="font-weight: 500">{{ probe.id }}</td>
                         <td style="color: var(--text-secondary)">{{ probe.type }}</td>
-                        <td style="color: var(--text-secondary)">{{ probe.interval / 1000 }}s</td>
                         <td>{{ probe.lastBlock || '-' }}</td>
                         <td>{{ formatTime(probe.lastUpdate) }}</td>
                         <td>
-                            <button @click="runProbe(probe.id)" class="action-btn">
-                                <i data-lucide="play" width="12"></i> Run
-                            </button>
+                            <div class="btn-group">
+                                <button v-if="probe.enabled" @click="controlProbe(probe.id, 'disable')"
+                                    class="btn-icon btn-stop" title="Stop">
+                                    <i data-lucide="square" width="14"></i>
+                                </button>
+                                <button v-else @click="controlProbe(probe.id, 'enable')" class="btn-icon"
+                                    style="color: var(--accent-green); border-color: var(--accent-green)" title="Start">
+                                    <i data-lucide="play" width="14"></i>
+                                </button>
+
+                                <button @click="controlProbe(probe.id, 'run')" class="btn-icon btn-run" title="Run Now">
+                                    <i data-lucide="fast-forward" width="14"></i>
+                                </button>
+
+                                <button @click="muteProbe(probe.id)" class="btn-icon btn-mute" title="Mute 15m">
+                                    <i data-lucide="bell-off" width="14"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Recent Alerts -->
+        <!-- Alerts & Runs sections omitted for brevity but should be here -->
         <div class="card" style="margin-bottom: 30px;">
             <div class="card-header">
                 <h2>Recent Alerts</h2>
             </div>
-            <div v-if="alerts.length === 0" class="empty-state">
-                No recent alerts
-            </div>
+            <div v-if="alerts.length === 0" style="text-align:center;color:#94a3b8;padding:20px;">No recent alerts</div>
             <table v-else>
                 <thead>
                     <tr>
                         <th>Time</th>
                         <th>Severity</th>
                         <th>Probe</th>
-                        <th>Message Title</th>
+                        <th>Message</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="alert in alerts" :key="alert.alert_id">
+                    <tr v-for="alert in alerts">
                         <td>{{ formatTime(alert.sent_at) }}</td>
-                        <td>
-                            <span :class="'badge badge-' + (alert.severity === 'critical' ? 'error' : 'warning')">
-                                {{ alert.severity }}
-                            </span>
-                        </td>
+                        <td><span :class="'badge badge-' + (alert.severity === 'critical' ? 'error' : 'warning')">{{
+                                alert.severity }}</span></td>
                         <td>{{ alert.probe_id }}</td>
-                        <td style="color: var(--text-secondary)">{{ alert.probe_id }} (Rule: {{ alert.rule_id }})</td>
+                        <td>{{ alert.probe_id }} rule hit</td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- Runs Log -->
         <div class="card">
             <div class="card-header">
-                <h2>Recent Runs (Logs)</h2>
+                <h2>Run History</h2>
             </div>
             <table>
                 <thead>
@@ -394,56 +304,46 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="run in runs" :key="run.id">
-                        <td style="color: var(--text-secondary)">{{ formatTime(run.created_at) }}</td>
+                    <tr v-for="run in runs">
+                        <td>{{ formatTime(run.created_at) }}</td>
                         <td>{{ run.probe_id }}</td>
-                        <td>
-                            <span :class="run.status === 'success' ? 'badge badge-success' : 'badge badge-error'">
-                                {{ run.status }}
-                            </span>
-                        </td>
-                        <td style="color: var(--text-secondary)">{{ run.duration_ms }}ms</td>
-                        <td style="color: var(--text-secondary); font-size: 0.9em;">{{ run.error_message || '-' }}</td>
+                        <td><span :class="run.status === 'success' ? 'badge badge-success' : 'badge badge-error'">{{
+                                run.status }}</span></td>
+                        <td>{{ run.duration_ms }}ms</td>
+                        <td>{{ run.error_message || '-' }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-
     </div>
 
     <script>
         const { createApp } = Vue;
-
         createApp({
-            data() {
-                return {
-                    status: null,
-                    probes: [],
-                    alerts: [],
-                    runs: []
-                }
-            },
+            data() { return { probes: [], alerts: [], runs: [] } },
             methods: {
-                formatTime(ts) {
-                    if (!ts) return '-';
-                    return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                },
+                formatTime(ts) { return ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'; },
                 async reloadData() {
-                    const [s, p, a, r] = await Promise.all([
-                        fetch('/api/status').then(r => r.json()),
+                    const [p, a, r] = await Promise.all([
                         fetch('/api/probes').then(r => r.json()),
                         fetch('/api/alerts').then(r => r.json()),
                         fetch('/api/runs?limit=10').then(r => r.json())
                     ]);
-                    this.status = s;
                     this.probes = p;
                     this.alerts = a;
                     this.runs = r;
                 },
-                async runProbe(id) {
-                    await fetch(`/api/probes/${id}/run`, { method: 'POST' });
-                    // Provide visual feedback or toast? For now just refresh logs quickly
-                    setTimeout(this.reloadData, 1000);
+                async controlProbe(id, action) {
+                    await fetch(`/api/probes/${id}/${action}`, { method: 'POST' });
+                    setTimeout(this.reloadData, 500);
+                },
+                async muteProbe(id) {
+                    await fetch(`/api/probes/${id}/mute`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ duration: 15 })
+                    });
+                    setTimeout(this.reloadData, 500);
                 },
                 async logout() {
                     await fetch('/auth/logout', { method: 'POST' });
@@ -453,11 +353,9 @@
             mounted() {
                 this.reloadData();
                 setInterval(this.reloadData, 5000);
-                setTimeout(() => lucide.createIcons(), 100); // Init icons
+                setTimeout(() => lucide.createIcons(), 100);
             },
-            updated() {
-                lucide.createIcons(); // Re-init icons on DOM update
-            }
+            updated() { lucide.createIcons(); }
         }).mount('#app');
     </script>
 </body>

@@ -27,6 +27,9 @@ class ThresholdRule extends BaseRule {
         const threshold = parseFloat(this.config.threshold);
         let triggered = false;
 
+        const stateKey = `rule_${this.id}_last_status`;
+        const lastStatus = context.data ? context.data[stateKey] : 'ok';
+
         switch (this.config.operator) {
             case '>': triggered = val > threshold; break;
             case '>=': triggered = val >= threshold; break;
@@ -38,8 +41,8 @@ class ThresholdRule extends BaseRule {
             // Check state for deduplication/spam if needed?
             // "Crossing" logic: only fire if PREVIOUSLY it was safe.
             // This requires access to state.
-            const stateKey = `rule_${this.id}_last_status`;
-            const lastStatus = context.data ? context.data[stateKey] : 'ok';
+            // const stateKey = `rule_${this.id}_last_status`; // MOVED UP
+            // const lastStatus = context.data ? context.data[stateKey] : 'ok'; // MOVED UP
 
             // Only alert if we just crossed into danger zone (or if allowRepeats is true)
             // But if we want to reset state when it goes back to normal:
