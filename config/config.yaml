@@ -54,7 +54,7 @@ probes:
         type: threshold
         fact: impliedApy
         operator: ">"
-        threshold: 0.14
+        threshold: 0.15
         severity: warning
         title: "Pendle APY Alert"
         messageTemplate: "Implied APY is ${value} (Threshold: ${threshold})"
