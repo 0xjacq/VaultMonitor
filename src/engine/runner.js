@@ -71,6 +71,8 @@ class ProbeRunner {
 
             if (generatedAlerts && generatedAlerts.length > 0) {
                 await this.alertManager.processAlerts(generatedAlerts);
+            } else {
+                console.log(`[Runner] Probe ${probeId} run complete (No alerts)`);
             }
 
             StateManager.recordRun(probeId, 'success', Date.now() - start);
