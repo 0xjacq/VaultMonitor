@@ -1,0 +1,7 @@
+node_modules
+npm-debug.log
+last_processed.txt
+usd3_state.json
+database.sqlite
+.git
+.env

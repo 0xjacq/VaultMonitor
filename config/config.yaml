@@ -1,0 +1,43 @@
+probes:
+  - id: usd3_monitor
+    type: evm_call
+    enabled: true
+    interval: 60000 # 60s
+    rpcUrl: https://eth.drpc.org
+    calls:
+      - name: supplyCap
+        target: "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc"
+        abi: ["function supplyCap() view returns (uint256)"]
+        method: supplyCap
+        decimals: 6
+      
+      - name: totalAssets
+        target: "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc"
+        abi: ["function totalAssets() view returns (uint256)"]
+        method: totalAssets
+        decimals: 6
+
+    rules:
+      - id: cap_threshold_check
+        type: threshold
+        fact: supplyCap_formatted
+        operator: ">"
+        threshold: 50000000
+        severity: warning
+        title: "USD3 Cap Threshold Breached"
+        messageTemplate: "Supply Cap is ${value} (Limit: ${threshold})"
+
+      - id: assets_threshold_check
+        type: threshold
+        fact: totalAssets_formatted
+        operator: ">"
+        threshold: 50000000
+        severity: warning
+        title: "USD3 Assets Threshold Breached"
+        messageTemplate: "Total Assets is ${value} (Limit: ${threshold})"
+      
+      - id: cap_change_check
+        type: change
+        fact: supplyCap_formatted
+        severity: info
+        title: "USD3 Supply Cap Changed"

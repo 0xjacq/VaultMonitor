@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  vault-monitor:
+    build: .
+    image: vault-monitor:latest
+    container_name: vault-monitor
+    restart: unless-stopped
+    volumes:
+      # Persist SQLite database
+      - ./database.sqlite:/app/database.sqlite
+      # Mount config file
+      - ./config/config.yaml:/app/config/config.yaml
+    environment:
+      - NODE_ENV=production
+      # Inject secrets via environment variables
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    # Log configuration (optional but good for VPS limits)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
