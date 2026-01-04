@@ -230,8 +230,12 @@
                 <tbody>
                     <tr v-for="probe in probes" :key="probe.id">
                         <td>
-                            <span v-if="probe.enabled" class="badge badge-success">Running</span>
-                            <span v-else class="badge badge-gray">Stopped</span>
+                            <div style="display: flex; gap: 6px;">
+                                <span v-if="probe.enabled" class="badge badge-success">Running</span>
+                                <span v-else class="badge badge-gray">Stopped</span>
+                                <span v-if="isMuted(probe)" class="badge badge-warning"
+                                    :title="'Muted until ' + formatTime(probe.mutedUntil)">Muted</span>
+                            </div>
                         </td>
                         <td style="font-weight: 500">{{ probe.id }}</td>
                         <td style="color: var(--text-secondary)">{{ probe.type }}</td>
@@ -252,7 +256,11 @@
                                     <i data-lucide="fast-forward" width="14"></i>
                                 </button>
 
-                                <button @click="muteProbe(probe.id)" class="btn-icon btn-mute" title="Mute 15m">
+                                <button v-if="isMuted(probe)" @click="controlProbe(probe.id, 'unmute')" class="btn-icon"
+                                    style="color: #f59e0b; border-color: #f59e0b" title="Unmute">
+                                    <i data-lucide="bell" width="14"></i>
+                                </button>
+                                <button v-else @click="muteProbe(probe.id)" class="btn-icon btn-mute" title="Mute 15m">
                                     <i data-lucide="bell-off" width="14"></i>
                                 </button>
                             </div>
@@ -322,6 +330,9 @@
         createApp({
             data() { return { probes: [], alerts: [], runs: [] } },
             methods: {
+                isMuted(probe) {
+                    return probe.mutedUntil && new Date(probe.mutedUntil) > new Date();
+                },
                 formatTime(ts) { return ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-'; },
                 async reloadData() {
                     const [p, a, r] = await Promise.all([

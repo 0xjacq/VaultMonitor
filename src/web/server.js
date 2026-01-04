@@ -129,10 +129,11 @@ class WebServer {
                     return {
                         id: p.id,
                         type: p.type,
-                        enabled: p.enabled && isRunning, // logic might vary
+                        enabled: p.enabled && isRunning,
                         interval: p.interval,
                         lastBlock: state ? state.last_block : 0,
-                        lastUpdate: state ? state.updated_at : null
+                        lastUpdate: state ? state.updated_at : null,
+                        mutedUntil: (state && state.data) ? state.data.muted_until : null
                     };
                 });
                 res.json(probes);
@@ -160,6 +161,9 @@ class WebServer {
                     const muteDuration = duration || 15; // default 15 min
                     await this.runner.muteProbe(id, muteDuration);
                     res.json({ success: true, message: `Probe ${id} muted for ${muteDuration}m` });
+                } else if (action === 'unmute') {
+                    await this.runner.unmuteProbe(id);
+                    res.json({ success: true, message: `Probe ${id} unmuted` });
                 } else {
                     res.status(400).json({ error: `Invalid action: ${action}` });
                 }

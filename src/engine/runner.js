@@ -73,17 +73,20 @@ class ProbeRunner {
     }
 
     async muteProbe(id, durationMinutes) {
-        console.log(`[Runner] Muting probe ${id}...`);
-        try {
-            const state = StateManager.getProbeState(id) || {};
-            const muteUntil = Date.now() + (durationMinutes * 60 * 1000);
-            state.data = state.data || {};
-            state.data.muted_until = muteUntil;
+        const state = StateManager.getProbeState(id) || {};
+        const muteUntil = Date.now() + (durationMinutes * 60 * 1000);
+        state.data = state.data || {};
+        state.data.muted_until = muteUntil;
+        StateManager.saveProbeState(id, state);
+        console.log(`[Runner] Probe ${id} muted for ${durationMinutes}m`);
+    }
+
+    async unmuteProbe(id) {
+        const state = StateManager.getProbeState(id) || {};
+        if (state.data && state.data.muted_until) {
+            delete state.data.muted_until;
             StateManager.saveProbeState(id, state);
-            console.log(`[Runner] Probe ${id} muted for ${durationMinutes}m`);
-        } catch (e) {
-            console.error('[Runner] muteProbe failed:', e);
-            throw e;
+            console.log(`[Runner] Probe ${id} unmuted.`);
         }
     }
 
