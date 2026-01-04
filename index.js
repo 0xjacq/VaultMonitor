@@ -36,6 +36,11 @@ async function main() {
     const factory = new ProbeFactory();
     const runner = new ProbeRunner(factory, alertManager);
 
+    // 5. Start Web Server
+    const WebServer = require('./src/web/server');
+    const webServer = new WebServer(runner, alertManager);
+    webServer.start(process.env.PORT || 3000);
+
     await runner.start(config);
 
     // Handle shutdown

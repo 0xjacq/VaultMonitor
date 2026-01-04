@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>VaultMonitor Dashboard</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-ok {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-fail {
+            color: red;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background: #eee;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .badge-critical {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>🛡️ VaultMonitor</h1>
+            <button @click="logout" class="btn">Logout</button>
+        </header>
+
+        <!-- STATUS -->
+        <div class="card">
+            <h2>System Status</h2>
+            <div v-if="status">
+                <span class="status-ok">● Online</span>
+                | Uptime: {{ (status.uptime / 60).toFixed(0) }} min
+            </div>
+            <div v-else>Loading...</div>
+        </div>
+
+        <!-- PROBES -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between;">
+                <h2>Probes</h2>
+                <button @click="fetchProbes" class="btn">Refresh</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Type</th>
+                        <th>Interval</th>
+                        <th>Last Block</th>
+                        <th>Last Update</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="probe in probes" :key="probe.id">
+                        <td>{{ probe.id }}</td>
+                        <td>{{ probe.type }}</td>
+                        <td>{{ probe.interval / 1000 }}s</td>
+                        <td>{{ probe.lastBlock }}</td>
+                        <td>{{ probe.lastUpdate ? new Date(probe.lastUpdate).toLocaleTimeString() : '-' }}</td>
+                        <td>
+                            <button @click="runProbe(probe.id)" class="btn">▶ Run Now</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ALERTS -->
+        <div class="card">
+            <h2>Recent Alerts (History)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Severity</th>
+                        <th>Probe</th>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="alert in alerts" :key="alert.alert_id">
+                        <td>{{ new Date(alert.sent_at).toLocaleString() }}</td>
+                        <td>
+                            <span :class="'badge badge-' + alert.severity">{{ alert.severity }}</span>
+                        </td>
+                        <td>{{ alert.probe_id }}</td>
+                        <td>{{ alert.probe_id }} - Rule: {{ alert.rule_id }} (See DB for full msg)</td>
+                        <!-- Simplification: alert object structure in DB might differ slightly from memory -->
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- RUNS (LOGS) -->
+        <div class="card">
+            <h2>Recent Runs (Logs)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Probe</th>
+                        <th>Status</th>
+                        <th>Duration</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="run in runs" :key="run.id">
+                        <td>{{ new Date(run.created_at).toLocaleTimeString() }}</td>
+                        <td>{{ run.probe_id }}</td>
+                        <td>
+                            <span :class="run.status === 'success' ? 'status-ok' : 'status-fail'">{{ run.status
+                                }}</span>
+                        </td>
+                        <td>{{ run.duration_ms }}ms</td>
+                        <td>{{ run.error_message || '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    status: null,
+                    probes: [],
+                    alerts: [],
+                    runs: []
+                }
+            },
+            methods: {
+                async fetchStatus() {
+                    const res = await fetch('/api/status');
+                    this.status = await res.json();
+                },
+                async fetchProbes() {
+                    const res = await fetch('/api/probes');
+                    this.probes = await res.json();
+                },
+                async fetchAlerts() {
+                    const res = await fetch('/api/alerts');
+                    this.alerts = await res.json();
+                },
+                async fetchRuns() {
+                    const res = await fetch('/api/runs?limit=10');
+                    this.runs = await res.json();
+                },
+                async runProbe(id) {
+                    if (!confirm('Run ' + id + ' now?')) return;
+                    await fetch(`/api/probes/${id}/run`, { method: 'POST' });
+                    // Refresh logs after a short delay
+                    setTimeout(this.fetchRuns, 1000);
+                },
+                async logout() {
+                    await fetch('/auth/logout', { method: 'POST' });
+                    window.location.href = '/login';
+                }
+            },
+            mounted() {
+                this.fetchStatus();
+                this.fetchProbes();
+                this.fetchAlerts();
+                this.fetchRuns();
+                // Polling every 10s
+                setInterval(() => {
+                    this.fetchStatus();
+                    this.fetchProbes();
+                    this.fetchRuns();
+                }, 10000);
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
