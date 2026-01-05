@@ -27,7 +27,7 @@ class WebServer {
             name: 'session',
             keys: [process.env.SESSION_SECRET || 'secret_key_change_me'],
             maxAge: 12 * 60 * 60 * 1000, // 12 hours
-            secure: process.env.NODE_ENV === 'production', // Secure cookies in prod (HTTPS)
+            secure: process.env.COOKIE_SECURE === 'true', // Only use secure cookies if explicitly set
             httpOnly: true
         }));
 
