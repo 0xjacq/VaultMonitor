@@ -32,7 +32,10 @@ export class WebServer {
 
     private setupMiddleware(): void {
         this.app.use(bodyParser.json());
-        this.app.use(express.static(path.join(__dirname, 'public')));
+
+        // Serve static files from source directory (HTML, CSS, JS)
+        const publicPath = path.join(process.cwd(), 'src/web/public');
+        this.app.use(express.static(publicPath));
 
         this.app.use(cookieSession({
             name: 'session',
@@ -75,12 +78,14 @@ export class WebServer {
     }
 
     private setupRoutes(): void {
+        const publicPath = path.join(process.cwd(), 'src/web/public');
+
         // Serve frontend
         this.app.get('/', (req: Request, res: Response) =>
-            res.sendFile(path.join(__dirname, 'public', 'index.html'))
+            res.sendFile(path.join(publicPath, 'index.html'))
         );
         this.app.get('/login', (req: Request, res: Response) =>
-            res.sendFile(path.join(__dirname, 'public', 'login.html'))
+            res.sendFile(path.join(publicPath, 'login.html'))
         );
 
         // Auth API

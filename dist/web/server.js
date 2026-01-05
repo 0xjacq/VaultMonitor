@@ -65,7 +65,9 @@ class WebServer {
     }
     setupMiddleware() {
         this.app.use(body_parser_1.default.json());
-        this.app.use(express_1.default.static(path.join(__dirname, 'public')));
+        // Serve static files from source directory (HTML, CSS, JS)
+        const publicPath = path.join(process.cwd(), 'src/web/public');
+        this.app.use(express_1.default.static(publicPath));
         this.app.use((0, cookie_session_1.default)({
             name: 'session',
             keys: [process.env.SESSION_SECRET || 'secret_key_change_me'],
@@ -100,9 +102,10 @@ class WebServer {
         });
     }
     setupRoutes() {
+        const publicPath = path.join(process.cwd(), 'src/web/public');
         // Serve frontend
-        this.app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-        this.app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+        this.app.get('/', (req, res) => res.sendFile(path.join(publicPath, 'index.html')));
+        this.app.get('/login', (req, res) => res.sendFile(path.join(publicPath, 'login.html')));
         // Auth API
         this.app.post('/auth/login', (req, res) => {
             const { password } = req.body;
