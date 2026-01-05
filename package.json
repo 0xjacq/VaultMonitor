@@ -2,9 +2,13 @@
   "name": "aave-ink-withdraw-bot",
   "version": "1.0.0",
   "description": "Telegram bot to notify on Aave Ink withdrawals",
-  "main": "bot.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node bot.js"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "axios": "^1.13.2",
@@ -18,5 +22,13 @@
     "node-telegram-bot-api": "^0.64.0",
     "winston": "^3.19.0",
     "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/body-parser": "^1.19.6",
+    "@types/cookie-session": "^2.0.49",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.3",
+    "typescript": "^5.9.3"
   }
 }
