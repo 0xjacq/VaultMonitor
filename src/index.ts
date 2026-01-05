@@ -3,26 +3,57 @@
  */
 import { initDB } from './data/db';
 import { ConfigLoader } from './utils/config-loader';
-import { StateManager } from './engine/state-manager';
+import { ProbeRunner } from './engine/runner';
+import { ProbeFactory } from './engine/probe-factory';
+import { RuleFactory } from './engine/rule-factory';
+import { AlertManager } from './engine/alert-manager';
+import { TelegramChannel } from './channels/telegram';
 import * as path from 'path';
 
-// Initialize database
-initDB();
+async function main() {
+    try {
+        // Initialize database
+        initDB();
 
-// Load configuration
-const configPath = process.env.CONFIG_PATH || path.join(process.cwd(), 'config', 'config.yaml');
-console.log('[Main] Loading configuration from:', configPath);
+        // Load configuration
+        const configPath = process.env.CONFIG_PATH || path.join(process.cwd(), 'config', 'config.yaml');
+        console.log('[Main] Loading configuration from:', configPath);
 
-try {
-    const config = ConfigLoader.load(configPath);
-    console.log(`[Main] Loaded ${config.probes.length} probes`);
+        const config = ConfigLoader.load(configPath);
+        console.log(`[Main] Loaded ${config.probes.length} probes`);
 
-    // For now, just validate the config loads successfully
-    // Full Runner integration will come in next phase
-    console.log('[Main] TypeScript migration successful - config validation passed');
-    console.log('[Main] Note: Full probe execution not yet migrated to TS');
+        // Initialize components
+        const probeFactory = new ProbeFactory();
+        const ruleFactory = new RuleFactory();
+        const alertManager = new AlertManager();
 
-} catch (err) {
-    console.error('[Main] Failed to start:', err);
-    process.exit(1);
+        // Register notification channels
+        if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+            const telegram = new TelegramChannel({
+                token: process.env.TELEGRAM_BOT_TOKEN,
+                chatId: process.env.TELEGRAM_CHAT_ID
+            });
+            alertManager.registerChannel(telegram);
+            console.log('[Main] Telegram channel registered');
+        } else {
+            console.warn('[Main] Telegram credentials not found, alerts will not be sent');
+        }
+
+        // Create and start runner
+        const runner = new ProbeRunner(probeFactory, ruleFactory, alertManager);
+        await runner.start(config);
+
+        console.log('[Main] VaultMonitor started successfully');
+        console.log('[Main] TypeScript migration complete - running in full TS mode');
+
+    } catch (err) {
+        console.error('[Main] Failed to start:', err);
+        process.exit(1);
+    }
 }
+
+// Start the application
+main().catch(err => {
+    console.error('[Main] Unhandled error:', err);
+    process.exit(1);
+});

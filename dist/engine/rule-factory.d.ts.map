@@ -1,0 +1,1 @@
+{"version":3,"file":"rule-factory.d.ts","sourceRoot":"","sources":["../../src/engine/rule-factory.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,OAAO,EAAE,QAAQ,EAAE,MAAM,mBAAmB,CAAC;AAC7C,OAAO,EAAE,UAAU,EAAE,MAAM,iBAAiB,CAAC;AAI7C,qBAAa,WAAW;IACpB,MAAM,CAAC,MAAM,EAAE,UAAU,GAAG,QAAQ;CAUvC"}
