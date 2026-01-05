@@ -31,9 +31,9 @@ export const HttpProbeConfigSchema = BaseProbeConfigSchema.extend({
     type: z.literal('http'),
     url: z.string().url(),
     method: z.enum(['GET', 'POST']).optional().default('GET'),
-    headers: z.record(z.string()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
     body: z.any().optional(),
-    extract: z.record(z.string()).optional(), // key -> JSONPath or dot-notation
+    extract: z.record(z.string(), z.string()).optional(), // key -> JSONPath or dot-notation
 });
 
 // Discriminated union for all probe types
