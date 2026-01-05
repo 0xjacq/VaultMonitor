@@ -10,7 +10,18 @@ class EvmCallProbe extends BaseProbe {
     constructor(id, config) {
         super(id, config);
         if (!config.rpcUrl) throw new Error('EvmCallProbe requires rpcUrl');
-        this.provider = new ethers.JsonRpcProvider(config.rpcUrl);
+
+        // Configure provider with timeout (default 15s)
+        const timeout = config.timeout || 15000;
+        this.provider = new ethers.JsonRpcProvider(config.rpcUrl, undefined, {
+            staticNetwork: true,
+            polling: false,
+            pollingInterval: 0,
+            batchMaxCount: 1  // Disable batching for predictable timeouts
+        });
+
+        // Set fetch options with timeout
+        this.provider._getConnection().timeout = timeout;
     }
 
     async run(state) {

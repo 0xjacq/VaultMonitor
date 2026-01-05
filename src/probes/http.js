@@ -25,7 +25,7 @@ class HttpProbe extends BaseProbe {
                 url: this.config.url,
                 headers: this.config.headers || {},
                 data: this.config.body,
-                timeout: 10000
+                timeout: this.config.timeout || 15000  // Configurable, default 15s
             });
 
             const data = response.data;
