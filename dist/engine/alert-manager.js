@@ -12,26 +12,33 @@ class AlertManager {
         this.channels.push(channel);
     }
     async processAlerts(alerts, probeState) {
+        console.log(`[AlertManager] 📨 Processing ${alerts.length} alert(s)...`);
         for (const alert of alerts) {
+            console.log(`[AlertManager] Processing alert: ${alert.id}`);
+            console.log(`[AlertManager]   Title: ${alert.title}`);
+            console.log(`[AlertManager]   Severity: ${alert.severity}`);
+            console.log(`[AlertManager]   Message: ${alert.message}`);
             // Step 1: Check mute
             if (this.isMuted(probeState)) {
-                console.log(`[AlertManager] Alert ${alert.id} suppressed (probe muted)`);
+                console.log(`[AlertManager]   ⏸️  SUPPRESSED (probe muted)`);
                 continue;
             }
             // Step 2: Dedup with TTL
             if (this.isDuplicate(alert)) {
-                console.log(`[AlertManager] Alert ${alert.id} suppressed (duplicate)`);
+                console.log(`[AlertManager]   ⏸️  SUPPRESSED (duplicate)`);
                 continue;
             }
             // Step 3: Cooldown check
             if (this.isInCooldown(alert)) {
-                console.log(`[AlertManager] Alert ${alert.id} suppressed (cooldown)`);
+                console.log(`[AlertManager]   ⏸️  SUPPRESSED (cooldown)`);
                 continue;
             }
             // Step 4: Route to channels
+            console.log(`[AlertManager]   ✉️  Routing to ${this.channels.length} channel(s)...`);
             await this.routeToChannels(alert);
             // Step 5: Record alert + cooldown
             this.recordAlert(alert);
+            console.log(`[AlertManager]   ✅ Alert processed and recorded`);
         }
     }
     isMuted(state) {

@@ -12,6 +12,19 @@ export const BaseProbeConfigSchema = z.object({
     timeout: z.number().positive().optional().default(15000),
 });
 
+// Rule config schema (defined before probes so it can be referenced)
+export const RuleConfigSchema = z.object({
+    id: z.string(),
+    type: z.enum(['threshold', 'change']),
+    fact: z.string(),
+    threshold: z.number().optional(),
+    operator: z.enum(['>', '>=', '<', '<=']).optional(),
+    severity: z.enum(['info', 'warning', 'critical']).optional(),
+    title: z.string().optional(),
+    messageTemplate: z.string().optional(),
+});
+
+
 // EVM Call probe config
 export const EvmCallConfigSchema = BaseProbeConfigSchema.extend({
     type: z.literal('evm_call'),
@@ -24,6 +37,7 @@ export const EvmCallConfigSchema = BaseProbeConfigSchema.extend({
         args: z.array(z.any()).optional(),
         decimals: z.number().int().min(0).max(18).optional(),
     })),
+    rules: z.array(RuleConfigSchema).optional(),
 });
 
 // HTTP probe config with simplified extract
@@ -34,6 +48,7 @@ export const HttpProbeConfigSchema = BaseProbeConfigSchema.extend({
     headers: z.record(z.string(), z.string()).optional(),
     body: z.any().optional(),
     extract: z.record(z.string(), z.string()).optional(), // key -> JSONPath or dot-notation
+    rules: z.array(RuleConfigSchema).optional(),
 });
 
 // Discriminated union for all probe types
@@ -41,18 +56,6 @@ export const ProbeConfigSchema = z.discriminatedUnion('type', [
     EvmCallConfigSchema,
     HttpProbeConfigSchema,
 ]);
-
-// Rule config schema
-export const RuleConfigSchema = z.object({
-    id: z.string(),
-    type: z.enum(['threshold', 'change']),
-    fact: z.string(),
-    threshold: z.number().optional(),
-    operator: z.enum(['>', '>=', '<', '<=']).optional(),
-    severity: z.enum(['info', 'warning', 'critical']).optional(),
-    title: z.string().optional(),
-    messageTemplate: z.string().optional(),
-});
 
 // App config schema
 export const AppConfigSchema = z.object({

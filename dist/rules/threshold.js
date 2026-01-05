@@ -9,9 +9,13 @@ const domain_1 = require("../types/domain");
 const alert_helpers_1 = require("../utils/alert-helpers");
 class ThresholdRule extends base_rule_1.BaseRule {
     async evaluate(facts, context) {
-        const val = parseFloat(String(facts[this.config.fact] ?? ''));
-        if (isNaN(val))
+        const factValue = facts[this.config.fact];
+        console.log(`[ThresholdRule:${this.id}] Checking fact '${this.config.fact}': ${factValue}`);
+        const val = parseFloat(String(factValue ?? ''));
+        if (isNaN(val)) {
+            console.log(`[ThresholdRule:${this.id}] Fact value is NaN, skipping`);
             return null;
+        }
         const threshold = this.config.threshold;
         let triggered = false;
         switch (this.config.operator) {
@@ -28,7 +32,9 @@ class ThresholdRule extends base_rule_1.BaseRule {
                 triggered = val <= threshold;
                 break;
         }
+        console.log(`[ThresholdRule:${this.id}] Comparison: ${val} ${this.config.operator} ${threshold} = ${triggered}`);
         const lastStatus = this.getRuleState(context) ?? 'ok';
+        console.log(`[ThresholdRule:${this.id}] Last status: ${lastStatus}, Current: ${triggered ? 'triggered' : 'ok'}`);
         if (triggered && lastStatus === 'ok') {
             // Crossed into danger zone
             this.setRuleState(context, 'triggered');

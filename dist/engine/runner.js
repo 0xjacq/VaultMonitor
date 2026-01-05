@@ -25,15 +25,35 @@ class ProbeRunner {
         this.config = config; // Store config for WebServer access
         // Initialize probes and rules
         for (const probeConfig of config.probes) {
-            if (!probeConfig.enabled)
+            console.log(`[Runner] Processing probe: ${probeConfig.id} (enabled: ${probeConfig.enabled})`);
+            if (!probeConfig.enabled) {
+                console.log(`[Runner] Skipping disabled probe: ${probeConfig.id}`);
                 continue;
+            }
             const probe = this.probeFactory.create(probeConfig);
             this.probeInstances.set(probeConfig.id, probe);
-            // Create rules for this probe (assuming rules are in probe config)
-            // For now, we'll handle this via web UI or separate config
-            this.rulesByProbe.set(probeConfig.id, []);
+            // Load rules from config
+            const rules = [];
+            if (probeConfig.rules && Array.isArray(probeConfig.rules)) {
+                console.log(`[Runner] Loading ${probeConfig.rules.length} rules for probe ${probeConfig.id}`);
+                for (const ruleConfig of probeConfig.rules) {
+                    try {
+                        const rule = this.ruleFactory.create(ruleConfig);
+                        rules.push(rule);
+                        console.log(`[Runner]   ✓ Loaded rule: ${ruleConfig.id} (type: ${ruleConfig.type})`);
+                    }
+                    catch (err) {
+                        console.error(`[Runner]   ✗ Failed to load rule ${ruleConfig.id}:`, err);
+                    }
+                }
+            }
+            else {
+                console.log(`[Runner] No rules defined for probe ${probeConfig.id}`);
+            }
+            this.rulesByProbe.set(probeConfig.id, rules);
             this.scheduleProbe(probeConfig);
         }
+        console.log(`[Runner] Engine started with ${this.probeInstances.size} active probes`);
     }
     scheduleProbe(config) {
         const intervalMs = config.interval * 1000;
@@ -80,12 +100,15 @@ class ProbeRunner {
             const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Probe timeout')), timeout));
             const state = this.stateManager.getProbeState(probeId);
             // Collect facts
+            console.log(`[Runner:${probeId}] 📊 Collecting facts...`);
             const factsPromise = probe.collect(state);
             const facts = await Promise.race([factsPromise, timeoutPromise]);
+            console.log(`[Runner:${probeId}] ✓ Facts collected:`, JSON.stringify(facts, (key, value) => typeof value === 'bigint' ? value.toString() : value));
             // Validate fact keys (optional warning)
             (0, fact_helpers_1.validateFactKeys)(facts);
             // Evaluate rules
             const rules = this.rulesByProbe.get(probeId) || [];
+            console.log(`[Runner:${probeId}] 🔍 Evaluating ${rules.length} rules...`);
             const alerts = [];
             const context = {
                 probeId,
@@ -94,21 +117,28 @@ class ProbeRunner {
             };
             for (const rule of rules) {
                 try {
+                    console.log(`[Runner:${probeId}]   Evaluating rule: ${rule.id}`);
                     const result = await rule.evaluate(facts, context);
                     if (result) {
-                        if (Array.isArray(result))
-                            alerts.push(...result);
-                        else
-                            alerts.push(result);
+                        const resultArray = Array.isArray(result) ? result : [result];
+                        alerts.push(...resultArray);
+                        console.log(`[Runner:${probeId}]   🚨 Rule ${rule.id} TRIGGERED! Alerts: ${resultArray.length}`);
+                    }
+                    else {
+                        console.log(`[Runner:${probeId}]   ✓ Rule ${rule.id} passed (no alert)`);
                     }
                 }
                 catch (err) {
-                    console.error(`[Runner:${probeId}] Rule ${rule.id} failed:`, err);
+                    console.error(`[Runner:${probeId}]   ✗ Rule ${rule.id} failed:`, err);
                 }
             }
             // Process alerts through AlertManager pipeline
             if (alerts.length > 0) {
+                console.log(`[Runner:${probeId}] 📬 Processing ${alerts.length} alerts through AlertManager...`);
                 await this.alertManager.processAlerts(alerts, state);
+            }
+            else {
+                console.log(`[Runner:${probeId}] ✓ No alerts to process`);
             }
             // Save updated state
             this.stateManager.saveProbeState(probeId, state);

@@ -16,8 +16,14 @@ interface ThresholdConfig {
 
 export class ThresholdRule extends BaseRule<ThresholdConfig> {
     async evaluate(facts: Facts, context: ProbeContext): Promise<Alert | null> {
-        const val = parseFloat(String(facts[this.config.fact] ?? ''));
-        if (isNaN(val)) return null;
+        const factValue = facts[this.config.fact];
+        console.log(`[ThresholdRule:${this.id}] Checking fact '${this.config.fact}': ${factValue}`);
+
+        const val = parseFloat(String(factValue ?? ''));
+        if (isNaN(val)) {
+            console.log(`[ThresholdRule:${this.id}] Fact value is NaN, skipping`);
+            return null;
+        }
 
         const threshold = this.config.threshold;
         let triggered = false;
@@ -29,7 +35,11 @@ export class ThresholdRule extends BaseRule<ThresholdConfig> {
             case '<=': triggered = val <= threshold; break;
         }
 
+        console.log(`[ThresholdRule:${this.id}] Comparison: ${val} ${this.config.operator} ${threshold} = ${triggered}`);
+
         const lastStatus = this.getRuleState<string>(context) ?? 'ok';
+        console.log(`[ThresholdRule:${this.id}] Last status: ${lastStatus}, Current: ${triggered ? 'triggered' : 'ok'}`);
+
 
         if (triggered && lastStatus === 'ok') {
             // Crossed into danger zone

@@ -13,67 +13,6 @@ export declare const BaseProbeConfigSchema: z.ZodObject<{
     interval: z.ZodNumber;
     timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
 }, z.core.$strip>;
-export declare const EvmCallConfigSchema: z.ZodObject<{
-    id: z.ZodString;
-    enabled: z.ZodBoolean;
-    interval: z.ZodNumber;
-    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
-    type: z.ZodLiteral<"evm_call">;
-    rpcUrl: z.ZodString;
-    calls: z.ZodArray<z.ZodObject<{
-        name: z.ZodString;
-        target: z.ZodString;
-        abi: z.ZodArray<z.ZodAny>;
-        method: z.ZodString;
-        args: z.ZodOptional<z.ZodArray<z.ZodAny>>;
-        decimals: z.ZodOptional<z.ZodNumber>;
-    }, z.core.$strip>>;
-}, z.core.$strip>;
-export declare const HttpProbeConfigSchema: z.ZodObject<{
-    id: z.ZodString;
-    enabled: z.ZodBoolean;
-    interval: z.ZodNumber;
-    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
-    type: z.ZodLiteral<"http">;
-    url: z.ZodString;
-    method: z.ZodDefault<z.ZodOptional<z.ZodEnum<{
-        GET: "GET";
-        POST: "POST";
-    }>>>;
-    headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
-    body: z.ZodOptional<z.ZodAny>;
-    extract: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
-}, z.core.$strip>;
-export declare const ProbeConfigSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
-    id: z.ZodString;
-    enabled: z.ZodBoolean;
-    interval: z.ZodNumber;
-    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
-    type: z.ZodLiteral<"evm_call">;
-    rpcUrl: z.ZodString;
-    calls: z.ZodArray<z.ZodObject<{
-        name: z.ZodString;
-        target: z.ZodString;
-        abi: z.ZodArray<z.ZodAny>;
-        method: z.ZodString;
-        args: z.ZodOptional<z.ZodArray<z.ZodAny>>;
-        decimals: z.ZodOptional<z.ZodNumber>;
-    }, z.core.$strip>>;
-}, z.core.$strip>, z.ZodObject<{
-    id: z.ZodString;
-    enabled: z.ZodBoolean;
-    interval: z.ZodNumber;
-    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
-    type: z.ZodLiteral<"http">;
-    url: z.ZodString;
-    method: z.ZodDefault<z.ZodOptional<z.ZodEnum<{
-        GET: "GET";
-        POST: "POST";
-    }>>>;
-    headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
-    body: z.ZodOptional<z.ZodAny>;
-    extract: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
-}, z.core.$strip>], "type">;
 export declare const RuleConfigSchema: z.ZodObject<{
     id: z.ZodString;
     type: z.ZodEnum<{
@@ -96,6 +35,155 @@ export declare const RuleConfigSchema: z.ZodObject<{
     title: z.ZodOptional<z.ZodString>;
     messageTemplate: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
+export declare const EvmCallConfigSchema: z.ZodObject<{
+    id: z.ZodString;
+    enabled: z.ZodBoolean;
+    interval: z.ZodNumber;
+    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    type: z.ZodLiteral<"evm_call">;
+    rpcUrl: z.ZodString;
+    calls: z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        target: z.ZodString;
+        abi: z.ZodArray<z.ZodAny>;
+        method: z.ZodString;
+        args: z.ZodOptional<z.ZodArray<z.ZodAny>>;
+        decimals: z.ZodOptional<z.ZodNumber>;
+    }, z.core.$strip>>;
+    rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        type: z.ZodEnum<{
+            threshold: "threshold";
+            change: "change";
+        }>;
+        fact: z.ZodString;
+        threshold: z.ZodOptional<z.ZodNumber>;
+        operator: z.ZodOptional<z.ZodEnum<{
+            ">": ">";
+            ">=": ">=";
+            "<": "<";
+            "<=": "<=";
+        }>>;
+        severity: z.ZodOptional<z.ZodEnum<{
+            info: "info";
+            warning: "warning";
+            critical: "critical";
+        }>>;
+        title: z.ZodOptional<z.ZodString>;
+        messageTemplate: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+export declare const HttpProbeConfigSchema: z.ZodObject<{
+    id: z.ZodString;
+    enabled: z.ZodBoolean;
+    interval: z.ZodNumber;
+    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    type: z.ZodLiteral<"http">;
+    url: z.ZodString;
+    method: z.ZodDefault<z.ZodOptional<z.ZodEnum<{
+        GET: "GET";
+        POST: "POST";
+    }>>>;
+    headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    body: z.ZodOptional<z.ZodAny>;
+    extract: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        type: z.ZodEnum<{
+            threshold: "threshold";
+            change: "change";
+        }>;
+        fact: z.ZodString;
+        threshold: z.ZodOptional<z.ZodNumber>;
+        operator: z.ZodOptional<z.ZodEnum<{
+            ">": ">";
+            ">=": ">=";
+            "<": "<";
+            "<=": "<=";
+        }>>;
+        severity: z.ZodOptional<z.ZodEnum<{
+            info: "info";
+            warning: "warning";
+            critical: "critical";
+        }>>;
+        title: z.ZodOptional<z.ZodString>;
+        messageTemplate: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>;
+export declare const ProbeConfigSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
+    id: z.ZodString;
+    enabled: z.ZodBoolean;
+    interval: z.ZodNumber;
+    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    type: z.ZodLiteral<"evm_call">;
+    rpcUrl: z.ZodString;
+    calls: z.ZodArray<z.ZodObject<{
+        name: z.ZodString;
+        target: z.ZodString;
+        abi: z.ZodArray<z.ZodAny>;
+        method: z.ZodString;
+        args: z.ZodOptional<z.ZodArray<z.ZodAny>>;
+        decimals: z.ZodOptional<z.ZodNumber>;
+    }, z.core.$strip>>;
+    rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        type: z.ZodEnum<{
+            threshold: "threshold";
+            change: "change";
+        }>;
+        fact: z.ZodString;
+        threshold: z.ZodOptional<z.ZodNumber>;
+        operator: z.ZodOptional<z.ZodEnum<{
+            ">": ">";
+            ">=": ">=";
+            "<": "<";
+            "<=": "<=";
+        }>>;
+        severity: z.ZodOptional<z.ZodEnum<{
+            info: "info";
+            warning: "warning";
+            critical: "critical";
+        }>>;
+        title: z.ZodOptional<z.ZodString>;
+        messageTemplate: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>, z.ZodObject<{
+    id: z.ZodString;
+    enabled: z.ZodBoolean;
+    interval: z.ZodNumber;
+    timeout: z.ZodDefault<z.ZodOptional<z.ZodNumber>>;
+    type: z.ZodLiteral<"http">;
+    url: z.ZodString;
+    method: z.ZodDefault<z.ZodOptional<z.ZodEnum<{
+        GET: "GET";
+        POST: "POST";
+    }>>>;
+    headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    body: z.ZodOptional<z.ZodAny>;
+    extract: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+    rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        type: z.ZodEnum<{
+            threshold: "threshold";
+            change: "change";
+        }>;
+        fact: z.ZodString;
+        threshold: z.ZodOptional<z.ZodNumber>;
+        operator: z.ZodOptional<z.ZodEnum<{
+            ">": ">";
+            ">=": ">=";
+            "<": "<";
+            "<=": "<=";
+        }>>;
+        severity: z.ZodOptional<z.ZodEnum<{
+            info: "info";
+            warning: "warning";
+            critical: "critical";
+        }>>;
+        title: z.ZodOptional<z.ZodString>;
+        messageTemplate: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>>>;
+}, z.core.$strip>], "type">;
 export declare const AppConfigSchema: z.ZodObject<{
     probes: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         id: z.ZodString;
@@ -112,6 +200,28 @@ export declare const AppConfigSchema: z.ZodObject<{
             args: z.ZodOptional<z.ZodArray<z.ZodAny>>;
             decimals: z.ZodOptional<z.ZodNumber>;
         }, z.core.$strip>>;
+        rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            type: z.ZodEnum<{
+                threshold: "threshold";
+                change: "change";
+            }>;
+            fact: z.ZodString;
+            threshold: z.ZodOptional<z.ZodNumber>;
+            operator: z.ZodOptional<z.ZodEnum<{
+                ">": ">";
+                ">=": ">=";
+                "<": "<";
+                "<=": "<=";
+            }>>;
+            severity: z.ZodOptional<z.ZodEnum<{
+                info: "info";
+                warning: "warning";
+                critical: "critical";
+            }>>;
+            title: z.ZodOptional<z.ZodString>;
+            messageTemplate: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>>;
     }, z.core.$strip>, z.ZodObject<{
         id: z.ZodString;
         enabled: z.ZodBoolean;
@@ -126,6 +236,28 @@ export declare const AppConfigSchema: z.ZodObject<{
         headers: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
         body: z.ZodOptional<z.ZodAny>;
         extract: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodString>>;
+        rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            type: z.ZodEnum<{
+                threshold: "threshold";
+                change: "change";
+            }>;
+            fact: z.ZodString;
+            threshold: z.ZodOptional<z.ZodNumber>;
+            operator: z.ZodOptional<z.ZodEnum<{
+                ">": ">";
+                ">=": ">=";
+                "<": "<";
+                "<=": "<=";
+            }>>;
+            severity: z.ZodOptional<z.ZodEnum<{
+                info: "info";
+                warning: "warning";
+                critical: "critical";
+            }>>;
+            title: z.ZodOptional<z.ZodString>;
+            messageTemplate: z.ZodOptional<z.ZodString>;
+        }, z.core.$strip>>>;
     }, z.core.$strip>], "type">>;
 }, z.core.$strip>;
 export type BaseProbeConfig = z.infer<typeof BaseProbeConfigSchema>;

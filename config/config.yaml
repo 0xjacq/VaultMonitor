@@ -20,25 +20,24 @@ probes:
     rules:
       - id: cap_threshold_check
         type: threshold
-        fact: supplyCap_formatted
-        operator: ">"
-        threshold: 50000000
-        severity: warning
-        title: "USD3 Cap Threshold Breached"
-        messageTemplate: "Supply Cap is ${value} (Limit: ${threshold})"
+        fact: metric.supplyCap_formatted
+        operator: ">="
+        threshold: 49000000
+        severity: critical
+        title: "USD3 Vault Near Capacity"
+        messageTemplate: "Supply cap is ${value} (Threshold: ${threshold})"
 
       - id: assets_threshold_check
         type: threshold
-        fact: totalAssets_formatted
-        operator: ">"
-        threshold: 50000000
+        fact: metric.totalAssets_formatted
+        operator: ">="
+        threshold: 48000000
         severity: warning
-        title: "USD3 Assets Threshold Breached"
-        messageTemplate: "Total Assets is ${value} (Limit: ${threshold})"
+        title: "USD3 Vault High Usage"
       
       - id: cap_change_check
         type: change
-        fact: supplyCap_formatted
+        fact: metric.supplyCap_formatted
         severity: info
         title: "USD3 Supply Cap Changed"
 
@@ -52,9 +51,9 @@ probes:
     rules:
       - id: pendle_apy_check
         type: threshold
-        fact: impliedApy
+        fact: http.impliedApy
         operator: ">"
-        threshold: 0.15
+        threshold: 0.13
         severity: warning
         title: "Pendle APY Alert"
         messageTemplate: "Implied APY is ${value} (Threshold: ${threshold})"
