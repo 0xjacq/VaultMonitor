@@ -6,42 +6,54 @@ const dbPath = path.join(process.cwd(), 'database.sqlite');
 const db = new Database(dbPath); // verbose: console.log
 
 function initDB() {
-    // 1. Probe State
-    // Stores the last known state for each probe (e.g. last block scanned, last value seen)
+    console.log('[DB] Initializing fresh database schema...');
+
+    // Drop old tables for fresh start
+    db.exec(`DROP TABLE IF EXISTS probe_state`);
+    db.exec(`DROP TABLE IF EXISTS sent_alerts`);
+    db.exec(`DROP TABLE IF EXISTS run_history`);
+    db.exec(`DROP TABLE IF EXISTS cooldowns`);
+
+    // 1. Probe State (namespaced: probe.* and rule.*)
     db.exec(`
-        CREATE TABLE IF NOT EXISTS probe_state (
+        CREATE TABLE probe_state (
             probe_id TEXT PRIMARY KEY,
-            last_block INTEGER DEFAULT 0,
-            data JSON, -- Stores arbitrary state like { lastCap: "...", lastImpl: "..." }
+            probe_json TEXT DEFAULT '{}',
+            rule_json TEXT DEFAULT '{}',
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
-    // 2. Alert Deduplication
-    // Tracks sent alerts to prevent duplicates based on config rules
+    // 2. Alert Deduplication (with TTL support)
     db.exec(`
-        CREATE TABLE IF NOT EXISTS sent_alerts (
+        CREATE TABLE sent_alerts (
             alert_id TEXT PRIMARY KEY,
-            probe_id TEXT,
-            rule_id TEXT,
+            probe_id TEXT NOT NULL,
+            rule_id TEXT NOT NULL,
             sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
-    // 3. Run History (Health/Metrics)
-    // Tracks execution status of each probe run
+    // 3. Cooldown Tracking (separate from dedup)
     db.exec(`
-        CREATE TABLE IF NOT EXISTS run_history (
+        CREATE TABLE cooldowns (
+            key TEXT PRIMARY KEY,
+            last_sent_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+
+    // 4. Run History (unchanged)
+    db.exec(`
+        CREATE TABLE run_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            probe_id TEXT,
-            status TEXT, -- 'success', 'error'
-            duration_ms INTEGER,
+            probe_id TEXT NOT NULL,
+            status TEXT NOT NULL,
+            duration_ms INTEGER NOT NULL,
             error_message TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
 
-    // Periodic cleanup for run_history can be added later
     console.log('[DB] Database initialized at', dbPath);
 }
 
