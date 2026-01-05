@@ -43,6 +43,7 @@ const probe_factory_1 = require("./engine/probe-factory");
 const rule_factory_1 = require("./engine/rule-factory");
 const alert_manager_1 = require("./engine/alert-manager");
 const telegram_1 = require("./channels/telegram");
+const server_1 = require("./web/server");
 const path = __importStar(require("path"));
 async function main() {
     try {
@@ -74,6 +75,10 @@ async function main() {
         await runner.start(config);
         console.log('[Main] VaultMonitor started successfully');
         console.log('[Main] TypeScript migration complete - running in full TS mode');
+        // Start web server
+        const webServer = new server_1.WebServer(runner, alertManager);
+        const port = parseInt(process.env.PORT || '3000');
+        webServer.start(port);
     }
     catch (err) {
         console.error('[Main] Failed to start:', err);

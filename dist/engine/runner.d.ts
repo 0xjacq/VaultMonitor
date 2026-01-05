@@ -13,6 +13,7 @@ export declare class ProbeRunner {
     private rulesByProbe;
     private runningProbes;
     private activeLocks;
+    config?: AppConfig;
     constructor(probeFactory: ProbeFactory, ruleFactory: RuleFactory, alertManager: AlertManager, stateManager?: typeof StateManager);
     start(config: AppConfig): Promise<void>;
     private scheduleProbe;

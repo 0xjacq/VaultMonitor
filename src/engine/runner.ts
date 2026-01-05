@@ -16,6 +16,7 @@ export class ProbeRunner {
     private rulesByProbe: Map<string, BaseRule[]> = new Map();
     private runningProbes: Map<string, NodeJS.Timeout> = new Map();
     private activeLocks: Map<string, number> = new Map(); // probeId -> lock timestamp
+    public config?: AppConfig; // Expose config for WebServer
 
     constructor(
         private readonly probeFactory: ProbeFactory,
@@ -26,6 +27,7 @@ export class ProbeRunner {
 
     async start(config: AppConfig): Promise<void> {
         console.log('[Runner] Starting engine...');
+        this.config = config; // Store config for WebServer access
 
         // Initialize probes and rules
         for (const probeConfig of config.probes) {

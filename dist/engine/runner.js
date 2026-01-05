@@ -13,6 +13,7 @@ class ProbeRunner {
     rulesByProbe = new Map();
     runningProbes = new Map();
     activeLocks = new Map(); // probeId -> lock timestamp
+    config; // Expose config for WebServer
     constructor(probeFactory, ruleFactory, alertManager, stateManager = state_manager_1.StateManager) {
         this.probeFactory = probeFactory;
         this.ruleFactory = ruleFactory;
@@ -21,6 +22,7 @@ class ProbeRunner {
     }
     async start(config) {
         console.log('[Runner] Starting engine...');
+        this.config = config; // Store config for WebServer access
         // Initialize probes and rules
         for (const probeConfig of config.probes) {
             if (!probeConfig.enabled)
