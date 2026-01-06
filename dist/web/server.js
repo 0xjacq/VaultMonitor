@@ -54,6 +54,7 @@ class WebServer {
     runner;
     alertManager;
     app;
+    server; // HTTP server instance
     constructor(runner, alertManager) {
         this.runner = runner;
         this.alertManager = alertManager;
@@ -237,8 +238,22 @@ class WebServer {
     }
     start(port = 3000) {
         const host = process.env.HOST || '0.0.0.0';
-        this.app.listen(port, host, () => {
+        this.server = this.app.listen(port, host, () => {
             console.log(`[Web] Dashboard running at http://${host}:${port}`);
+        });
+    }
+    stop() {
+        return new Promise((resolve) => {
+            if (this.server) {
+                console.log('[Web] Stopping server...');
+                this.server.close(() => {
+                    console.log('[Web] Server stopped');
+                    resolve();
+                });
+            }
+            else {
+                resolve();
+            }
         });
     }
 }

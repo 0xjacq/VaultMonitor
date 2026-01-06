@@ -16,6 +16,7 @@ export declare class ProbeRunner {
     config?: AppConfig;
     constructor(probeFactory: ProbeFactory, ruleFactory: RuleFactory, alertManager: AlertManager, stateManager?: typeof StateManager);
     start(config: AppConfig): Promise<void>;
+    stop(): void;
     private scheduleProbe;
     private runProbeWithTimeout;
     runProbeById(id: string): Promise<void>;

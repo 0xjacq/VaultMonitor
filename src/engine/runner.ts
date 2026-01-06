@@ -65,6 +65,20 @@ export class ProbeRunner {
         console.log(`[Runner] Engine started with ${this.probeInstances.size} active probes`);
     }
 
+    stop(): void {
+        console.log('[Runner] Stopping engine...');
+
+        // Clear all scheduled probes
+        for (const [probeId, timer] of this.runningProbes.entries()) {
+            clearInterval(timer);
+            console.log(`[Runner] Stopped probe: ${probeId}`);
+        }
+
+        this.runningProbes.clear();
+        this.activeLocks.clear();
+        console.log('[Runner] Engine stopped');
+    }
+
     private scheduleProbe(config: ProbeConfig): void {
         const intervalMs = config.interval * 1000;
         const timeout = config.timeout || 15000;

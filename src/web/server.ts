@@ -16,6 +16,7 @@ import { ConfigLoader } from '../utils/config-loader';
 
 export class WebServer {
     private app: Application;
+    private server?: any; // HTTP server instance
 
     constructor(
         private readonly runner: ProbeRunner,
@@ -228,8 +229,22 @@ export class WebServer {
 
     start(port: number = 3000): void {
         const host = process.env.HOST || '0.0.0.0';
-        this.app.listen(port, host, () => {
+        this.server = this.app.listen(port, host, () => {
             console.log(`[Web] Dashboard running at http://${host}:${port}`);
+        });
+    }
+
+    stop(): Promise<void> {
+        return new Promise((resolve) => {
+            if (this.server) {
+                console.log('[Web] Stopping server...');
+                this.server.close(() => {
+                    console.log('[Web] Server stopped');
+                    resolve();
+                });
+            } else {
+                resolve();
+            }
         });
     }
 }
