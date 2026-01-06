@@ -1,6 +1,7 @@
 /**
  * Main Entry Point (TypeScript)
  */
+import 'dotenv/config'; // Load .env file
 import { initDB } from './data/db';
 import { ConfigLoader } from './utils/config-loader';
 import { ProbeRunner } from './engine/runner';

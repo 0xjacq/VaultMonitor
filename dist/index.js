@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * Main Entry Point (TypeScript)
  */
+require("dotenv/config"); // Load .env file
 const db_1 = require("./data/db");
 const config_loader_1 = require("./utils/config-loader");
 const runner_1 = require("./engine/runner");
