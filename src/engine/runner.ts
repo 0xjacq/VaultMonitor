@@ -43,9 +43,9 @@ export class ProbeRunner {
 
             // Load rules from config
             const rules: BaseRule[] = [];
-            if ((probeConfig as any).rules && Array.isArray((probeConfig as any).rules)) {
-                console.log(`[Runner] Loading ${(probeConfig as any).rules.length} rules for probe ${probeConfig.id}`);
-                for (const ruleConfig of (probeConfig as any).rules) {
+            if (probeConfig.rules && Array.isArray(probeConfig.rules)) {
+                console.log(`[Runner] Loading ${probeConfig.rules.length} rules for probe ${probeConfig.id}`);
+                for (const ruleConfig of probeConfig.rules) {
                     try {
                         const rule = this.ruleFactory.create(ruleConfig);
                         rules.push(rule);
@@ -198,16 +198,70 @@ export class ProbeRunner {
     }
 
     // Control methods
+
+    /**
+     * Check if a probe exists in the configuration (for validation)
+     */
+    hasProbe(id: string): boolean {
+        // Check if probe exists in config OR is already instantiated
+        const inConfig = this.config?.probes.some(p => p.id === id) ?? false;
+        const instantiated = this.probeInstances.has(id);
+        return inConfig || instantiated;
+    }
+
+    /**
+     * Get probe configuration by ID
+     */
+    private getProbeConfig(id: string): PlatformProbeConfig | undefined {
+        return this.config?.probes.find(p => p.id === id);
+    }
+
     async runProbeById(id: string): Promise<void> {
         const probe = this.probeInstances.get(id);
-        if (!probe) throw new Error(`Probe ${id} not found`);
-        await this.runProbeWithTimeout(id, 15000);
+        if (!probe) throw new Error(`Probe ${id} not found or not enabled`);
+        const probeConfig = this.getProbeConfig(id);
+        const timeout = probeConfig?.timeout || 15000;
+        await this.runProbeWithTimeout(id, timeout);
     }
 
     enableProbe(id: string): void {
         console.log(`[Runner] Enabling probe ${id}`);
-        // Implementation depends on having config reference
-        // For now, just log
+
+        // Check if already running
+        if (this.runningProbes.has(id)) {
+            console.log(`[Runner] Probe ${id} is already running`);
+            return;
+        }
+
+        // Find probe config
+        const probeConfig = this.getProbeConfig(id);
+        if (!probeConfig) {
+            throw new Error(`Probe ${id} not found in configuration`);
+        }
+
+        // Create probe instance if not exists
+        if (!this.probeInstances.has(id)) {
+            const probe = this.probeFactory.create(probeConfig);
+            this.probeInstances.set(id, probe);
+
+            // Load rules
+            const rules: BaseRule[] = [];
+            if (probeConfig.rules && Array.isArray(probeConfig.rules)) {
+                for (const ruleConfig of probeConfig.rules) {
+                    try {
+                        const rule = this.ruleFactory.create(ruleConfig);
+                        rules.push(rule);
+                    } catch (err) {
+                        console.error(`[Runner] Failed to load rule ${ruleConfig.id}:`, err);
+                    }
+                }
+            }
+            this.rulesByProbe.set(id, rules);
+        }
+
+        // Schedule the probe
+        this.scheduleProbe(probeConfig);
+        console.log(`[Runner] Probe ${id} enabled and scheduled`);
     }
 
     disableProbe(id: string): void {

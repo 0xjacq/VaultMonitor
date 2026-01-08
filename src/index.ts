@@ -84,15 +84,20 @@ async function main() {
 
     console.log('\n✅ VaultMonitor running\n');
 
-    // Graceful shutdown
-    process.on('SIGINT', async () => {
-        console.log('\n🛑 Shutting down...');
+    // Graceful shutdown handler
+    const shutdown = async (signal: string) => {
+        console.log(`\n🛑 Received ${signal}, shutting down...`);
         runner.stop();
         await platformRegistry.destroyAll();
         await db.close();
-        webServer.stop();
+        await webServer.stop();
+        console.log('👋 Goodbye!');
         process.exit(0);
-    });
+    };
+
+    // Handle both SIGINT (Ctrl+C) and SIGTERM (Docker/Kubernetes)
+    process.on('SIGINT', () => shutdown('SIGINT'));
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
 main().catch(err => {
