@@ -1,0 +1,85 @@
+# =============================================================================
+# VaultMonitor - Production Docker Compose for VPS
+# =============================================================================
+# Usage:
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# Prerequisites:
+#   1. Create .env file with required secrets (see .env.example)
+#   2. Create config/config.yaml with your monitoring configuration
+#   3. Ensure the database.sqlite file exists (or let it be created)
+# =============================================================================
+
+services:
+  vault-monitor:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/vaultmonitor}:${IMAGE_TAG:-latest}
+    container_name: vault-monitor
+    restart: unless-stopped
+
+    # Security: run as non-root (matches Dockerfile USER)
+    user: "1001:1001"
+
+    # Resource limits (adjust based on your VPS)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+    # Volumes for persistence
+    volumes:
+      # SQLite database - persists across container restarts
+      - vaultmonitor-data:/app/data
+      # Configuration file - mount your config
+      - ./config/config.yaml:/app/config/config.yaml:ro
+
+    # Bind to localhost only (Nginx will proxy)
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - CONFIG_PATH=/app/config/config.yaml
+      # Secrets from .env file
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
+      - UI_PASSWORD=${UI_PASSWORD:?UI_PASSWORD is required}
+      - SESSION_SECRET=${SESSION_SECRET:?SESSION_SECRET is required}
+      # Enable secure cookies when behind HTTPS proxy
+      - COOKIE_SECURE=true
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "vaultmonitor"
+
+    # Network
+    networks:
+      - vaultmonitor-network
+
+# Named volume for database persistence
+volumes:
+  vaultmonitor-data:
+    driver: local
+
+# Network (can be external if using shared network with Nginx)
+networks:
+  vaultmonitor-network:
+    driver: bridge

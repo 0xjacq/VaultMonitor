@@ -1,6 +1,67 @@
-node_modules
-dist
+# =============================================================================
+# VaultMonitor Docker Build Ignore
+# =============================================================================
+
+# Dependencies (will be installed fresh in container)
+node_modules/
+
+# Build output (will be built in container)
+dist/
+
+# Development files
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files (secrets should come from env vars)
 .env
+.env.local
+.env.*.local
+
+# Database (will be created fresh or mounted as volume)
+*.sqlite
+*.sqlite3
 database.sqlite
+
+# IDE and OS files
 .DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in production image)
+*.md
+!README.md
+docs/
+
+# Test files
+tests/
+**/*.test.ts
+**/*.spec.ts
+coverage/
+.nyc_output/
+
+# CI/CD files
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Docker files (don't need to copy Docker configs into image)
+docker-compose*.yml
+Dockerfile*
+
+# Scripts (deployment scripts not needed inside container)
+scripts/
+
+# Example configs (main config will be mounted)
+config/examples/
+
+# Claude/AI assistant files
+.claude/
+CLAUDE.md
