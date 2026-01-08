@@ -21,6 +21,12 @@ BACKUP_DIR="${BACKUP_DIR:-/opt/vaultmonitor/backups}"
 COMPOSE_FILE="docker-compose.prod.yml"
 IMAGE_NAME="${IMAGE_NAME:-ghcr.io/your-username/vaultmonitor:latest}"
 
+# Ensure GITHUB_REPOSITORY is lowercase for Docker
+if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
+    export GITHUB_REPOSITORY=$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')
+fi
+
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -48,7 +54,14 @@ setup() {
     # Create necessary directories
     mkdir -p config
 
-    # Check for required files
+    # Load GITHUB_REPOSITORY from .env safely and force lowercase
+    if [[ -f ".env" ]]; then
+        REPO_FROM_ENV=$(grep "^GITHUB_REPOSITORY=" .env | cut -d'=' -f2-)
+        if [[ -n "$REPO_FROM_ENV" ]]; then
+             export GITHUB_REPOSITORY=$(echo "$REPO_FROM_ENV" | tr '[:upper:]' '[:lower:]')
+        fi
+    fi
+
     if [[ ! -f ".env" ]]; then
         log_warn ".env file not found. Creating from example..."
         cat > .env << 'EOF'
