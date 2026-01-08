@@ -166,6 +166,9 @@ jobs:
             # Pull the latest image
             docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+            # Force GITHUB_REPOSITORY to be lowercase (overrides .env)
+            export GITHUB_REPOSITORY="${{ env.IMAGE_NAME }}"
+
             # Update the running container
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
