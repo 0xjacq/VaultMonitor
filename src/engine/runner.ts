@@ -7,7 +7,7 @@ import { StateManager } from './state-manager';
 import { AlertManager } from './alert-manager';
 import { ProbeFactory } from './probe-factory';
 import { RuleFactory } from './rule-factory';
-import { AppConfig, ProbeConfig, RuleConfig } from '../types/config';
+import { PlatformAppConfig, PlatformProbeConfig, PlatformRuleConfig } from '../types/platform-config';
 import { Alert, ProbeContext, Severity } from '../types/domain';
 import { validateFactKeys } from '../utils/fact-helpers';
 
@@ -16,7 +16,7 @@ export class ProbeRunner {
     private rulesByProbe: Map<string, BaseRule[]> = new Map();
     private runningProbes: Map<string, NodeJS.Timeout> = new Map();
     private activeLocks: Map<string, number> = new Map(); // probeId -> lock timestamp
-    public config?: AppConfig; // Expose config for WebServer
+    public config?: PlatformAppConfig; // Expose config for WebServer
 
     constructor(
         private readonly probeFactory: ProbeFactory,
@@ -25,7 +25,7 @@ export class ProbeRunner {
         private readonly stateManager: typeof StateManager = StateManager
     ) { }
 
-    async start(config: AppConfig): Promise<void> {
+    async start(config: PlatformAppConfig): Promise<void> {
         console.log('[Runner] Starting engine...');
         this.config = config; // Store config for WebServer access
 
@@ -79,7 +79,7 @@ export class ProbeRunner {
         console.log('[Runner] Engine stopped');
     }
 
-    private scheduleProbe(config: ProbeConfig): void {
+    private scheduleProbe(config: PlatformProbeConfig): void {
         const intervalMs = config.interval * 1000;
         const timeout = config.timeout || 15000;
 

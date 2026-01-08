@@ -18,11 +18,19 @@ export enum ProbeType {
 export type FactValue = number | string | boolean | bigint | null;
 export type Facts = Record<string, FactValue>;
 
-// Namespaced fact keys for consistency
-export type FactKey =
-    | `metric.${string}`    // e.g. metric.supply_cap, metric.tvl
-    | `evm.${string}`       // e.g. evm.block_number, evm.total_assets
-    | `http.${string}`;     // e.g. http.response_time, http.apy
+/**
+ * Fact namespace - now platform-based
+ * 
+ * Each platform generates facts with its own namespace:
+ * - evm.*: EVM platform facts (e.g., evm.block, ev.totalSupply)
+ * - http.*: HTTP platform facts (e.g., http.response, http.status)
+ * - pendle.*: Pendle platform facts (e.g., pendle.impliedApy, pendle.totalLiquidity)
+ * - aave.*: Aave platform facts (e.g., aave.healthFactor, aave.riskLevel)
+ * - polymarket.*: Polymarket platform facts (e.g., polymarket.probability, polymarket.volume24h)
+ * 
+ * Generic string type allows any platform to define its own facts without type changes.
+ */
+export type FactKey = string;
 
 export interface Alert {
     id: string;

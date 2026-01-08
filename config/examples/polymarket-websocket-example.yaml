@@ -1,0 +1,76 @@
+# Polymarket WebSocket Example Configuration
+
+# Platform configuration with WebSocket enabled
+platforms:
+  - platform: polymarket
+    enabled: true
+    enableWebSocket: true  # Enable real-time WebSocket updates
+    config:
+      rateLimit: 100
+      circuitBreaker:
+        failureThreshold: 5
+        resetTimeout: 60000
+        halfOpenMaxAttempts: 3
+
+# Example probes
+
+probes:
+  # Real-time WebSocket probe (instant updates)
+  - id: polymarket_trump_2024_realtime
+    platform: polymarket
+    type: realtime_market_odds  # WebSocket-based
+    enabled: true
+    interval: 5000  # Poll every 5s (for fact collection, WebSocket provides instant updates)
+    timeout: 15000
+    config:
+      assetId: "71321045679252212594626385532706912750332728571942532289631379312455583992563"
+      marketSlug: "presidential-election-winner-2024"
+      outcome: "yes"
+    rules:
+      # Alert on rapid price changes (detected via WebSocket)
+      - id: rapid_odds_change
+        type: change
+        fact: polymarket.probability
+        threshold: 0.05  # Alert on 5% change
+        severity: warning
+        title: "Rapid Odds Movement"
+        messageTemplate: "Trump 2024 odds changed by {{polymarket.priceChangePercent}}% to {{polymarket.probabilityPercent}}%"
+      
+      # Alert on wide spread (low liquidity)
+      - id: wide_spread_alert
+        type: threshold
+        fact: polymarket.spreadPercent
+        operator: ">"
+        threshold: 2.0  # Alert if spread > 2%
+        severity: info
+        title: "Wide Bid-Ask Spread"
+
+  # Traditional REST API probe (for comparison or backup)
+  - id: polymarket_trump_2024_rest
+    platform: polymarket
+    type: market_odds  # REST-based
+    enabled: false  # Disabled since we have WebSocket version
+    interval: 60000
+    timeout: 15000
+    config:
+      marketSlug: "presidential-election-winner-2024"
+      outcome: "yes"
+
+  # Volume monitoring
+  - id: polymarket_trump_2024_volume
+    platform: polymarket
+    type: volume
+    enabled: true
+    interval: 300000  # Check every 5 minutes
+    timeout: 15000
+    config:
+      marketSlug: "presidential-election-winner-2024"
+    rules:
+      - id: volume_spike
+        type: threshold
+        fact: polymarket.activityLevel
+        operator: "="
+        threshold: "spike"
+        severity: critical
+        title: "Trading Volume Spike Detected"
+        messageTemplate: "Massive trading activity on Trump 2024 market"

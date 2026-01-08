@@ -1,2 +1,25 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Database
 database.sqlite
+
+# Environment (SENSITIVE)
+.env
+.env.local
+.env.*.local
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
