@@ -159,7 +159,7 @@ jobs:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME || 'vaultmonitor.local' }}
           ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || 'admin@example.com' }}
         run: |
-          npx serversguru-deploy deploy --yes
+          npx serversguru-deploy deploy
 
       - name: Notify on success
         if: success()
