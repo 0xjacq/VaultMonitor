@@ -1,0 +1,26 @@
+serversGuru:
+  apiKey: "${SERVERSGURU_API_KEY}"
+
+vps:
+  type: "nano" 
+  billingCycle: 1
+  location: "HEL1"
+  osImage: "ubuntu-22.04"
+
+app:
+  name: "vaultmonitor"
+  dockerImage: "ghcr.io/${GITHUB_REPOSITORY}:latest"
+  # Optional: pass user ID if needed, defaults are usually fine
+  # user: "1001" 
+  envVars:
+    NODE_ENV: "production"
+    PORT: "3000"
+    TELEGRAM_BOT_TOKEN: "${TELEGRAM_BOT_TOKEN}"
+    TELEGRAM_CHAT_ID: "${TELEGRAM_CHAT_ID}"
+    UI_PASSWORD: "${UI_PASSWORD}"
+    SESSION_SECRET: "${SESSION_SECRET}"
+  port: 3000
+  healthEndpoint: "/api/status"
+  domain:
+    name: "${DOMAIN_NAME}" 
+    email: "${ADMIN_EMAIL}"

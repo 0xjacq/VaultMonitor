@@ -147,47 +147,19 @@ jobs:
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
 
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script: |
-            set -e
-
-            # Navigate to deploy directory
-            cd ${{ secrets.VPS_DEPLOY_PATH }}
-
-            # Login to GitHub Container Registry
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Pull the latest image
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-            # Force GITHUB_REPOSITORY to be lowercase (overrides .env)
-            export GITHUB_REPOSITORY="${{ env.IMAGE_NAME }}"
-
-            # Update the running container
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-
-            # Wait for health check
-            echo "Waiting for application to be healthy..."
-            sleep 10
-
-            # Verify deployment
-            if curl -sf http://localhost:3000/api/status > /dev/null; then
-              echo "✅ Deployment successful!"
-            else
-              echo "❌ Health check failed!"
-              docker compose -f docker-compose.prod.yml logs --tail=50
-              exit 1
-            fi
-
-            # Cleanup old images
-            docker image prune -f
+      - name: Deploy with Servers Guru
+        env:
+          SERVERSGURU_API_KEY: ${{ secrets.SERVERSGURU_API_KEY }}
+          GITHUB_REPOSITORY: ${{ env.IMAGE_NAME }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          UI_PASSWORD: ${{ secrets.UI_PASSWORD }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          # Optional: add domain info if user has it in secrets, otherwise default or skip
+          DOMAIN_NAME: ${{ vars.DOMAIN_NAME || 'vaultmonitor.local' }}
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || 'admin@example.com' }}
+        run: |
+          npx serversguru-deploy deploy --yes
 
       - name: Notify on success
         if: success()

@@ -1,0 +1,2 @@
+- [ ] Redéployer sur un nouveau VPS à faible latence
+- [ ] Implémenter probes pour RE, SUSDAI, ETC
