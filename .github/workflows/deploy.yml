@@ -155,10 +155,11 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           UI_PASSWORD: ${{ secrets.UI_PASSWORD }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-          # Optional: add domain info if user has it in secrets, otherwise default or skip
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME || 'vaultmonitor.local' }}
           ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || 'admin@example.com' }}
         run: |
+          # Substitute environment variables in deploy.yaml
+          envsubst < deploy.yaml > deploy.yaml.tmp && mv deploy.yaml.tmp deploy.yaml
           npx serversguru-deploy deploy
 
       - name: Notify on success

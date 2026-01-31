@@ -2,7 +2,7 @@ serversGuru:
   apiKey: "${SERVERSGURU_API_KEY}"
 
 vps:
-  type: "nano" 
+  type: "nano"
   billingCycle: 1
   location: "HEL1"
   osImage: "ubuntu-24.04"
@@ -10,8 +10,6 @@ vps:
 app:
   name: "vaultmonitor"
   dockerImage: "ghcr.io/${GITHUB_REPOSITORY}:latest"
-  # Optional: pass user ID if needed, defaults are usually fine
-  # user: "1001" 
   envVars:
     NODE_ENV: "production"
     PORT: "3000"
@@ -22,5 +20,5 @@ app:
   port: 3000
   healthEndpoint: "/api/status"
   domain:
-    name: "${DOMAIN_NAME}" 
+    name: "${DOMAIN_NAME}"
     email: "${ADMIN_EMAIL}"
