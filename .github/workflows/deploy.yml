@@ -158,14 +158,14 @@ jobs:
           DOMAIN_NAME: ${{ vars.DOMAIN_NAME || 'vaultmonitor.local' }}
           ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || 'admin@example.com' }}
         run: |
-          # Debug: Test API connectivity
-          echo "Testing API connectivity..."
-          curl -s -H "X-API-KEY: $SERVERSGURU_API_KEY" "https://my.servers.guru/api/users/balance" | head -c 100
-          echo ""
+          # Debug: Show API key length (not the actual key)
+          echo "API key length: ${#SERVERSGURU_API_KEY}"
+
+          # Debug: Test API with verbose
+          curl -v -H "X-API-KEY: $SERVERSGURU_API_KEY" "https://my.servers.guru/api/users/balance" 2>&1 | head -50
 
           # Substitute environment variables in deploy.yaml
           envsubst < deploy.yaml > deploy.yaml.tmp && mv deploy.yaml.tmp deploy.yaml
-          cat deploy.yaml
 
           npx serversguru-deploy deploy
 
