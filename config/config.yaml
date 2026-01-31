@@ -41,11 +41,11 @@ probes:
         severity: warning
         title: "Pendle APY Dropped"
 
-  # Monitor pool liquidity
+  # Monitor pool liquidity (disabled - needs valid pool address)
   - id: pendle_usde_pool
     platform: pendle
     type: pool_liquidity
-    enabled: true
+    enabled: false
     interval: 300000  # Check every 5 minutes
     timeout: 15000
     config:

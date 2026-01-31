@@ -5,7 +5,7 @@ vps:
   type: "nano" 
   billingCycle: 1
   location: "HEL1"
-  osImage: "ubuntu-22.04"
+  osImage: "ubuntu-24.04"
 
 app:
   name: "vaultmonitor"
