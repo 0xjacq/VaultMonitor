@@ -128,56 +128,56 @@ jobs:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
 
   # ===========================================================================
-  # Job 3: Deploy to VPS
+  # Job 3: Deploy to VPS (DISABLED - uncomment when ready to deploy)
   # ===========================================================================
-  deploy:
-    name: Deploy to VPS
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    environment:
-      name: production
-      url: https://${{ vars.PRODUCTION_URL || 'your-domain.com' }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Lowercase IMAGE_NAME
-        run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
-
-
-      - name: Deploy with Servers Guru
-        env:
-          SERVERSGURU_API_KEY: ${{ secrets.SERVERSGURU_API_KEY }}
-          GITHUB_REPOSITORY: ${{ env.IMAGE_NAME }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          UI_PASSWORD: ${{ secrets.UI_PASSWORD }}
-          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-          DOMAIN_NAME: ${{ vars.DOMAIN_NAME || 'vaultmonitor.local' }}
-          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || 'admin@example.com' }}
-        run: |
-          # Debug: Test API and show response
-          echo "API key length: ${#SERVERSGURU_API_KEY}"
-          echo "Testing API..."
-          RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -H "X-API-KEY: $SERVERSGURU_API_KEY" "https://my.servers.guru/api/users/balance")
-          echo "Response: $RESPONSE"
-
-          # Substitute environment variables in deploy.yaml
-          envsubst < deploy.yaml > deploy.yaml.tmp && mv deploy.yaml.tmp deploy.yaml
-
-          npx serversguru-deploy deploy
-
-      - name: Notify on success
-        if: success()
-        run: |
-          echo "🚀 Deployment to production completed successfully!"
-          echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
-          echo "Commit: ${{ github.sha }}"
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "❌ Deployment failed!"
-          echo "Check the logs above for details."
+  # deploy:
+  #   name: Deploy to VPS
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+  #   environment:
+  #     name: production
+  #     url: https://${{ vars.PRODUCTION_URL || 'your-domain.com' }}
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Lowercase IMAGE_NAME
+  #       run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+  #
+  #
+  #     - name: Deploy with Servers Guru
+  #       env:
+  #         SERVERSGURU_API_KEY: ${{ secrets.SERVERSGURU_API_KEY }}
+  #         GITHUB_REPOSITORY: ${{ env.IMAGE_NAME }}
+  #         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  #         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  #         UI_PASSWORD: ${{ secrets.UI_PASSWORD }}
+  #         SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+  #         DOMAIN_NAME: ${{ vars.DOMAIN_NAME || 'vaultmonitor.local' }}
+  #         ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || 'admin@example.com' }}
+  #       run: |
+  #         # Debug: Test API and show response
+  #         echo "API key length: ${#SERVERSGURU_API_KEY}"
+  #         echo "Testing API..."
+  #         RESPONSE=$(curl -s -w "\nHTTP_CODE:%{http_code}" -H "X-API-KEY: $SERVERSGURU_API_KEY" "https://my.servers.guru/api/users/balance")
+  #         echo "Response: $RESPONSE"
+  #
+  #         # Substitute environment variables in deploy.yaml
+  #         envsubst < deploy.yaml > deploy.yaml.tmp && mv deploy.yaml.tmp deploy.yaml
+  #
+  #         npx serversguru-deploy deploy
+  #
+  #     - name: Notify on success
+  #       if: success()
+  #       run: |
+  #         echo "🚀 Deployment to production completed successfully!"
+  #         echo "Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+  #         echo "Commit: ${{ github.sha }}"
+  #
+  #     - name: Notify on failure
+  #       if: failure()
+  #       run: |
+  #         echo "❌ Deployment failed!"
+  #         echo "Check the logs above for details."
