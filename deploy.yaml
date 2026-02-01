@@ -2,14 +2,13 @@ serversGuru:
   apiKey: "${SERVERSGURU_API_KEY}"
 
 vps:
-  type: "nano"
+  type: "FI1-1"
   billingCycle: 1
-  location: "HEL1"
   osImage: "ubuntu-24.04"
 
 app:
   name: "vaultmonitor"
-  dockerImage: "ghcr.io/${GITHUB_REPOSITORY}:latest"
+  dockerImage: "ghcr.io/0xjacq/vaultmonitor:latest"
   envVars:
     NODE_ENV: "production"
     PORT: "3000"
@@ -19,6 +18,7 @@ app:
     SESSION_SECRET: "${SESSION_SECRET}"
   port: 3000
   healthEndpoint: "/api/status"
-  domain:
-    name: "${DOMAIN_NAME}"
-    email: "${ADMIN_EMAIL}"
+
+domain:
+  name: "klyra.watch"
+  email: "${DEPLOY_EMAIL}"
