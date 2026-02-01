@@ -28,7 +28,7 @@ on:
       deploy:
         description: 'Deploy to production'
         required: false
-        default: 'true'
+        default: true
         type: boolean
 
 env:

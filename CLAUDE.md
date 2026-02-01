@@ -110,3 +110,5 @@ SQLite (`database.sqlite`) with tables:
 - `sent_alerts`: Alert deduplication
 - `cooldowns`: Rate limiting per probe+rule
 - `run_history`: Execution logs
+
+Use npx serversguru-deploy to deploy/manage VPS
