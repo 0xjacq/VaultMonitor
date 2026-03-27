@@ -6,6 +6,8 @@ dist/
 
 # Database
 database.sqlite
+database.sqlite-shm
+database.sqlite-wal
 
 # Environment (SENSITIVE)
 .env
