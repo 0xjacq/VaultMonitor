@@ -10,6 +10,7 @@ interface ChangeConfig {
     severity?: Severity;
     title?: string;
     messageTemplate?: string;
+    cooldown?: number;
 }
 
 export class ChangeRule extends BaseRule<ChangeConfig> {
@@ -27,6 +28,7 @@ export class ChangeRule extends BaseRule<ChangeConfig> {
                 title: this.config.title || 'Value Changed',
                 message: this.formatMessage(lastValue, currentValue),
                 timestamp: Date.now(),
+                ...(this.config.cooldown !== undefined && { cooldownSeconds: this.config.cooldown }),
                 entities: {
                     'Previous Value': String(lastValue),
                     'New Value': String(currentValue)

@@ -20,34 +20,54 @@ export class TelegramChannel implements NotificationChannel {
 
     async send(alert: Alert): Promise<void> {
         const message = this.format(alert);
-        try {
-            await this.client.sendMessage(this.chatId, message, { parse_mode: 'Markdown' });
-        } catch (err) {
-            console.error('[Telegram] Send failed:', err);
-            throw err;
+        const maxAttempts = 3;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                await this.client.sendMessage(this.chatId, message, { parse_mode: 'Markdown' });
+                return;
+            } catch (err) {
+                console.error(`[Telegram] Send failed (attempt ${attempt}/${maxAttempts}):`, err);
+                if (attempt === maxAttempts) {
+                    throw err;
+                }
+                await this.sleep(1000 * Math.pow(2, attempt - 1));
+            }
         }
+    }
+
+    private sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     private format(alert: Alert): string {
         const icon = this.getSeverityIcon(alert.severity);
-        let msg = `${icon} *${alert.title}* ${icon}\n\n`;
-        msg += `${alert.message}\n`;
+        let msg = `${icon} *${this.escapeMarkdown(alert.title)}* ${icon}\n\n`;
+        msg += `${this.escapeMarkdown(alert.message)}\n`;
 
         if (alert.entities) {
             for (const [key, val] of Object.entries(alert.entities)) {
-                msg += `• *${key}*: ${val}\n`;
+                msg += `• *${this.escapeMarkdown(key)}*: ${this.escapeMarkdown(String(val))}\n`;
             }
         }
 
         if (alert.links && alert.links.length > 0) {
             msg += `\n`;
             alert.links.forEach(link => {
-                msg += `🔗 [${link.label}](${link.url})\n`;
+                msg += `🔗 [${this.escapeMarkdown(link.label)}](${link.url})\n`;
             });
         }
 
         msg += `\n_${new Date(alert.timestamp).toISOString()}_`;
+
+        if (msg.length > 4000) {
+            msg = msg.slice(0, 4000) + '\n\n... _(truncated)_';
+        }
+
         return msg;
+    }
+
+    private escapeMarkdown(text: string): string {
+        return text.replace(/([*_`\[])/g, '\\$1');
     }
 
     private getSeverityIcon(severity: Severity): string {

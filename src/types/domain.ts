@@ -40,6 +40,7 @@ export interface Alert {
     title: string;
     message: string;
     timestamp: number;
+    cooldownSeconds?: number;
     entities?: Record<string, string>;
     links?: Array<{ label: string; url: string }>;
 }

@@ -9,6 +9,7 @@ import * as path from 'path';
 
 const dbPath = path.join(process.cwd(), 'database.sqlite');
 export const db: Database.Database = new Database(dbPath);
+db.pragma('journal_mode = WAL');
 
 /**
  * Ensure database schema exists without dropping existing data.
@@ -61,6 +62,33 @@ export function ensureSchema(): void {
     db.exec(`CREATE INDEX IF NOT EXISTS idx_run_history_probe_id ON run_history(probe_id)`);
 
     console.log('[DB] Schema ensured at', dbPath);
+
+    // Cleanup old data on startup
+    cleanupOldData();
+}
+
+/**
+ * Remove old rows from sent_alerts, run_history, and cooldowns.
+ * Defaults to 90-day retention.
+ */
+export function cleanupOldData(retentionDays: number = 90): void {
+    const deleteAlerts = db.prepare(
+        `DELETE FROM sent_alerts WHERE sent_at < datetime('now', '-' || ? || ' days')`
+    );
+    const deleteHistory = db.prepare(
+        `DELETE FROM run_history WHERE created_at < datetime('now', '-' || ? || ' days')`
+    );
+    const deleteCooldowns = db.prepare(
+        `DELETE FROM cooldowns WHERE last_sent_at < datetime('now', '-' || ? || ' days')`
+    );
+
+    const alertsDeleted = deleteAlerts.run(retentionDays).changes;
+    const historyDeleted = deleteHistory.run(retentionDays).changes;
+    const cooldownsDeleted = deleteCooldowns.run(retentionDays).changes;
+
+    console.log(
+        `[DB] Cleanup complete: removed ${alertsDeleted} old alerts, ${historyDeleted} old runs, ${cooldownsDeleted} old cooldowns (retention: ${retentionDays} days)`
+    );
 }
 
 /**

@@ -33,6 +33,7 @@ probes:
         severity: info
         title: "High Pendle APY Detected"
         messageTemplate: "USDe market APY is {{pendle.impliedApy}}%"
+        cooldown: 300  # 5 minutes
       
       - id: apy_drop_alert
         type: change

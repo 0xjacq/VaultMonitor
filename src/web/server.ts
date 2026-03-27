@@ -77,7 +77,7 @@ export class WebServer {
     }
 
     private setupMiddleware(): void {
-        this.app.use(bodyParser.json());
+        this.app.use(bodyParser.json({ limit: '100kb' }));
 
         // Serve static files from source directory (HTML, CSS, JS)
         const publicPath = path.join(process.cwd(), 'src/web/public');
@@ -99,6 +99,14 @@ export class WebServer {
             message: { error: 'Too many login attempts, please try again later.' }
         });
         this.app.use('/auth/login', loginLimiter);
+
+        // General API rate limiter
+        const apiLimiter = rateLimit({
+            windowMs: 60 * 1000, // 1 minute
+            max: 100,
+            message: { error: 'Too many requests, please try again later.' }
+        });
+        this.app.use('/api/*', apiLimiter);
 
         // Auth Middleware
         this.app.use((req: Request, res: Response, next: NextFunction) => {
@@ -139,7 +147,11 @@ export class WebServer {
         this.app.post('/auth/login', (req: Request, res: Response) => {
             const { password } = req.body;
 
-            if (password === this.securityConfig.uiPassword) {
+            if (
+                typeof password === 'string' &&
+                password.length === this.securityConfig.uiPassword.length &&
+                crypto.timingSafeEqual(Buffer.from(password), Buffer.from(this.securityConfig.uiPassword))
+            ) {
                 (req.session as any).authenticated = true;
                 res.json({ success: true });
             } else {
@@ -154,7 +166,34 @@ export class WebServer {
 
         // Status
         this.app.get('/api/status', (req: Request, res: Response) => {
-            res.json({ status: 'ok', uptime: process.uptime() });
+            let dbStatus = 'ok';
+            let alerts24h = 0;
+            try {
+                db.prepare('SELECT 1').get();
+            } catch {
+                dbStatus = 'error';
+            }
+            try {
+                const row = db.prepare("SELECT COUNT(*) as count FROM sent_alerts WHERE sent_at > datetime('now', '-1 day')").get() as { count: number } | undefined;
+                alerts24h = row?.count ?? 0;
+            } catch {
+                alerts24h = 0;
+            }
+            const mem = process.memoryUsage();
+            res.json({
+                status: 'ok',
+                uptime: process.uptime(),
+                probes: {
+                    total: this.runner.config?.probes?.length || 0,
+                    running: (this.runner as any).runningProbes?.size || 0,
+                },
+                database: dbStatus,
+                alerts24h,
+                memory: {
+                    heapUsedMB: Math.round(mem.heapUsed / 1024 / 1024 * 10) / 10,
+                    rssMB: Math.round(mem.rss / 1024 / 1024 * 10) / 10,
+                },
+            });
         });
 
         // Probes List
@@ -222,14 +261,14 @@ export class WebServer {
 
         // Alerts List
         this.app.get('/api/alerts', (req: Request, res: Response) => {
-            const limit = parseInt(req.query.limit as string) || 50;
+            const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 50, 1), 1000);
             const rows = db.prepare('SELECT * FROM sent_alerts ORDER BY sent_at DESC LIMIT ?').all(limit);
             res.json(rows);
         });
 
         // Runs History (Logs)
         this.app.get('/api/runs', (req: Request, res: Response) => {
-            const limit = parseInt(req.query.limit as string) || 50;
+            const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 50, 1), 1000);
             const rows = db.prepare('SELECT * FROM run_history ORDER BY created_at DESC LIMIT ?').all(limit);
             res.json(rows);
         });
@@ -264,8 +303,10 @@ export class WebServer {
                     });
                 }
 
-                // Write to file only after validation passes
-                fs.writeFileSync(configPath, content, 'utf8');
+                // Write atomically: temp file then rename
+                const tmpPath = configPath + '.tmp';
+                fs.writeFileSync(tmpPath, content, 'utf8');
+                fs.renameSync(tmpPath, configPath);
                 res.json({ success: true });
             } catch (e: any) {
                 res.status(400).json({ error: 'Invalid YAML: ' + e.message });

@@ -23,6 +23,7 @@ export const RuleConfigSchema = z.object({
     severity: z.enum(['info', 'warning', 'critical']).optional(),
     title: z.string().optional(),
     messageTemplate: z.string().optional(),
+    cooldown: z.number().positive().optional(),
 });
 
 // Platform-based probe config schema

@@ -52,7 +52,7 @@ export class StateManager {
         if (!row) return false;
         if (!ttlMs) return true;
 
-        const sentAt = new Date(row.sent_at).getTime();
+        const sentAt = new Date(row.sent_at + 'Z').getTime();
         return (Date.now() - sentAt) < ttlMs;
     }
 
@@ -75,7 +75,7 @@ export class StateManager {
 
         if (!row) return false;
 
-        const lastSent = new Date(row.last_sent_at).getTime();
+        const lastSent = new Date(row.last_sent_at + 'Z').getTime();
         return (Date.now() - lastSent) < intervalMs;
     }
 
@@ -89,6 +89,26 @@ export class StateManager {
             ON CONFLICT(key) DO UPDATE SET last_sent_at = CURRENT_TIMESTAMP
         `);
         stmt.run(key);
+    }
+
+    /**
+     * Record alert and cooldown atomically in a single transaction
+     */
+    static recordAlertWithCooldown(alertId: string, probeId: string, ruleId: string, cooldownKey: string): void {
+        const txn = db.transaction(() => {
+            const alertStmt = db.prepare(
+                'INSERT OR IGNORE INTO sent_alerts (alert_id, probe_id, rule_id, sent_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP)'
+            );
+            alertStmt.run(alertId, probeId, ruleId);
+
+            const cooldownStmt = db.prepare(`
+                INSERT INTO cooldowns (key, last_sent_at)
+                VALUES (?, CURRENT_TIMESTAMP)
+                ON CONFLICT(key) DO UPDATE SET last_sent_at = CURRENT_TIMESTAMP
+            `);
+            cooldownStmt.run(cooldownKey);
+        });
+        txn();
     }
 
     /**

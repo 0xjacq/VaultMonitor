@@ -1,7 +1,7 @@
 {
-  "name": "aave-ink-withdraw-bot",
+  "name": "vault-monitor",
   "version": "1.0.0",
-  "description": "Telegram bot to notify on Aave Ink withdrawals",
+  "description": "DeFi monitoring system with platform-based architecture",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

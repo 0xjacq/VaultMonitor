@@ -12,6 +12,7 @@ interface ThresholdConfig {
     severity?: Severity;
     title?: string;
     messageTemplate?: string;
+    cooldown?: number;
 }
 
 export class ThresholdRule extends BaseRule<ThresholdConfig> {
@@ -53,6 +54,7 @@ export class ThresholdRule extends BaseRule<ThresholdConfig> {
                 title: this.config.title || 'Threshold Breached',
                 message: this.formatMessage(val, threshold),
                 timestamp: Date.now(),
+                ...(this.config.cooldown !== undefined && { cooldownSeconds: this.config.cooldown }),
                 entities: {
                     Value: val.toLocaleString(),
                     Threshold: threshold.toLocaleString()

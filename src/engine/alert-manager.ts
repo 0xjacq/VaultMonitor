@@ -70,7 +70,7 @@ export class AlertManager {
 
     private isInCooldown(alert: Alert): boolean {
         const key = `${alert.probeId}:${alert.ruleId}`;
-        const cooldownMs = 15 * 60 * 1000; // 15min default
+        const cooldownMs = (alert.cooldownSeconds ?? 15 * 60) * 1000;
         return this.stateManager.isInCooldown(key, cooldownMs);
     }
 
@@ -84,7 +84,11 @@ export class AlertManager {
     }
 
     private recordAlert(alert: Alert): void {
-        this.stateManager.recordAlert(alert.id, alert.probeId, alert.ruleId);
-        this.stateManager.recordCooldown(`${alert.probeId}:${alert.ruleId}`);
+        this.stateManager.recordAlertWithCooldown(
+            alert.id,
+            alert.probeId,
+            alert.ruleId,
+            `${alert.probeId}:${alert.ruleId}`
+        );
     }
 }

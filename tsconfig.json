@@ -6,7 +6,7 @@
         "rootDir": "./src",
         "strict": false,
         "noImplicitAny": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "strictFunctionTypes": false,
         "strictPropertyInitialization": false,
         "esModuleInterop": true,
