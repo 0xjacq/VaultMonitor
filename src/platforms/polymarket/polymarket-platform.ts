@@ -57,7 +57,8 @@ export class PolymarketPlatform extends BasePlatform {
         if (this.platformConfig.enableWebSocket !== false) {
             this.wsClient = new PolymarketWebSocketClient({
                 circuitBreaker: this.platformConfig.circuitBreaker,
-                autoConnect: true
+                autoConnect: true,
+                apiClient: this.apiClient
             });
             console.log('[PolymarketPlatform] WebSocket enabled for real-time data');
         }

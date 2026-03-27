@@ -20,8 +20,7 @@ import { EvmPlatform } from './platforms/evm';
 import { HttpPlatform } from './platforms/http';
 import { PendlePlatform } from './platforms/pendle';
 import { AavePlatform } from './platforms/aave';
-// TODO: Re-enable Polymarket platform when polymarket-websocket-client package issue is resolved
-// import { PolymarketPlatform } from './platforms/polymarket';
+import { PolymarketPlatform } from './platforms/polymarket';
 
 dotenv.config();
 
@@ -39,8 +38,7 @@ async function main() {
     platformRegistry.register(new HttpPlatform());
     platformRegistry.register(new PendlePlatform());
     platformRegistry.register(new AavePlatform());
-    // TODO: Re-enable when polymarket-websocket-client is fixed
-    // platformRegistry.register(new PolymarketPlatform());
+    platformRegistry.register(new PolymarketPlatform());
 
     // Log registered platforms
     const summary = platformRegistry.getSummary();
