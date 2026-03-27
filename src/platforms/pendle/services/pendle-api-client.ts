@@ -169,6 +169,85 @@ export class PendleApiClient {
     }
 
     /**
+     * Get user dashboard (cross-chain positions)
+     *
+     * @param userAddress Wallet address
+     */
+    async getUserDashboard(userAddress: string): Promise<any> {
+        await this.rateLimit();
+
+        return this.circuitBreaker.execute(async () => {
+            const url = `${this.baseUrl}/v1/dashboard/user/${userAddress}`;
+            const response = await this.fetchWithTimeout(url, 10000);
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error('Rate limited by Pendle API');
+                } else if (response.status >= 500) {
+                    throw new Error(`Pendle API server error: ${response.status}`);
+                } else if (response.status === 404) {
+                    throw new Error(`User not found: ${userAddress}`);
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        });
+    }
+
+    /**
+     * Get historical market data (time-series)
+     *
+     * @param chainId Chain ID
+     * @param marketAddress Market contract address
+     * @param timeFrame Time frame for data (e.g., "week", "month")
+     */
+    async getHistoricalData(chainId: number, marketAddress: string, timeFrame: string = 'week'): Promise<any> {
+        await this.rateLimit();
+
+        return this.circuitBreaker.execute(async () => {
+            const url = `${this.baseUrl}/v1/${chainId}/markets/${marketAddress}/historicalDataV2?timeFrame=${timeFrame}`;
+            const response = await this.fetchWithTimeout(url, 10000);
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error('Rate limited by Pendle API');
+                } else if (response.status >= 500) {
+                    throw new Error(`Pendle API server error: ${response.status}`);
+                } else if (response.status === 404) {
+                    throw new Error(`Market not found: ${marketAddress} on chain ${chainId}`);
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        });
+    }
+
+    /**
+     * Get all markets V2 (cross-chain, comprehensive data)
+     */
+    async getAllMarketsV2(): Promise<any> {
+        await this.rateLimit();
+
+        return this.circuitBreaker.execute(async () => {
+            const url = `${this.baseUrl}/v2/markets/getAllMarketsV2`;
+            const response = await this.fetchWithTimeout(url, 10000);
+
+            if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error('Rate limited by Pendle API');
+                } else if (response.status >= 500) {
+                    throw new Error(`Pendle API server error: ${response.status}`);
+                }
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        });
+    }
+
+    /**
      * Check if client is healthy
      */
     isHealthy(): boolean {

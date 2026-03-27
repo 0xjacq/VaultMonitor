@@ -58,3 +58,79 @@ probes:
         threshold: -0.20  # Alert if liquidity drops by 20%
         severity: critical
         title: "Major Liquidity Drop"
+
+  # Monitor wallet positions across Pendle
+  - id: pendle_wallet_positions
+    platform: pendle
+    type: user_position
+    enabled: true
+    interval: 300000  # Check every 5 minutes
+    timeout: 15000
+    config:
+      walletAddress: "0x..."  # Your wallet address
+      # chainId: 1  # Optional: filter to specific chain
+    rules:
+      - id: position_value_drop
+        type: change
+        fact: pendle.totalValueUsd
+        threshold: -0.10  # Alert if total value drops by 10%
+        severity: warning
+        title: "Pendle Position Value Drop"
+      - id: large_claimable
+        type: threshold
+        fact: pendle.claimableRewards
+        operator: ">"
+        threshold: 100  # Alert if claimable rewards > $100
+        severity: info
+        title: "Pendle Rewards Ready to Claim"
+        messageTemplate: "You have ${{pendle.claimableRewards}} in claimable rewards"
+
+  # Monitor PT discount to underlying
+  - id: pendle_usde_pt_discount
+    platform: pendle
+    type: pt_discount
+    enabled: true
+    interval: 60000  # Check every minute
+    timeout: 15000
+    config:
+      chainId: 1
+      marketAddress: "0xeaac9b0b4f25cc63255198a3920fcf7752509586"
+    rules:
+      - id: discount_widened
+        type: change
+        fact: pendle.ptDiscount
+        threshold: 0.02  # Alert if discount widens by 2%
+        severity: info
+        title: "PT Discount Widened"
+      - id: near_maturity
+        type: threshold
+        fact: pendle.daysToExpiry
+        operator: "<"
+        threshold: 7  # Alert when less than 7 days to maturity
+        severity: warning
+        title: "Pendle Market Near Maturity"
+        messageTemplate: "Market expires in {{pendle.daysToExpiry}} days"
+
+  # Monitor protocol-wide market health
+  - id: pendle_market_overview
+    platform: pendle
+    type: market_overview
+    enabled: true
+    interval: 300000  # Check every 5 minutes
+    timeout: 15000
+    config:
+      chainId: 1  # Optional: filter to Ethereum markets
+      # marketAddress: "0x..."  # Optional: filter to specific market
+    rules:
+      - id: tvl_drop
+        type: change
+        fact: pendle.tvl
+        threshold: -0.15  # Alert if TVL drops by 15%
+        severity: critical
+        title: "Pendle TVL Drop"
+      - id: apy_shift
+        type: change
+        fact: pendle.aggregatedApy
+        threshold: 0.05  # Alert if aggregated APY shifts by 5%
+        severity: info
+        title: "Pendle APY Shift Detected"

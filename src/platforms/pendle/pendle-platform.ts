@@ -9,6 +9,9 @@ import { BaseProbe } from '../../core/base-probe';
 import { PendleApiClient } from './services/pendle-api-client';
 import { MarketApyProbe } from './probes/market-apy';
 import { PoolLiquidityProbe } from './probes/pool-liquidity';
+import { UserPositionProbe } from './probes/user-position';
+import { PtDiscountProbe } from './probes/pt-discount';
+import { MarketOverviewProbe } from './probes/market-overview';
 
 export interface PendlePlatformConfig extends PlatformConfig {
     chainIds?: number[];  // Supported chain IDs
@@ -31,7 +34,9 @@ export class PendlePlatform extends BasePlatform {
         supportedProbeTypes: [
             'market_apy',
             'pool_liquidity',
-            // Future: 'user_position', 'pt_price', 'yt_price'
+            'user_position',
+            'pt_discount',
+            'market_overview',
         ],
     };
 
@@ -65,6 +70,12 @@ export class PendlePlatform extends BasePlatform {
                 return new MarketApyProbe(config.id, config, this.apiClient);
             case 'pool_liquidity':
                 return new PoolLiquidityProbe(config.id, config, this.apiClient);
+            case 'user_position':
+                return new UserPositionProbe(config.id, config, this.apiClient);
+            case 'pt_discount':
+                return new PtDiscountProbe(config.id, config, this.apiClient);
+            case 'market_overview':
+                return new MarketOverviewProbe(config.id, config, this.apiClient);
             default:
                 throw new Error(`Pendle probe type not implemented: ${type}`);
         }
